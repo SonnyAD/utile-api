@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"log"
 	"math/rand"
@@ -11,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/yaml.v2"
 )
 
 func RollDice(w http.ResponseWriter, r *http.Request) {
@@ -39,12 +42,34 @@ func DNSResolve(w http.ResponseWriter, r *http.Request) {
 			d := net.Dialer{
 				Timeout: time.Millisecond * time.Duration(10000),
 			}
-			return d.DialContext(ctx, network, "114.114.115.115:53")
+			return d.DialContext(ctx, network, "1.1.1.1:53")
 		},
 	}
+
+	var dns DNSResolved
+
 	ip, _ := resolver.LookupHost(context.Background(), domain)
 
-	fmt.Fprintf(w, ip[0])
+	dns.Addresses = ip
+
+	if contains(r.Header["Accept"], "text/html") {
+		fmt.Fprintf(w, ip[0])
+	} else if contains(r.Header["Accept"], "application/json") {
+		reply, _ := json.Marshal(dns)
+		fmt.Fprintf(w, string(reply))
+	} else if contains(r.Header["Accept"], "application/xml") {
+		reply, _ := xml.Marshal(dns)
+		fmt.Fprintf(w, string(reply))
+	} else if contains(r.Header["Accept"], "application/yaml") {
+		reply, _ := yaml.Marshal(dns)
+		fmt.Fprintf(w, string(reply))
+	} else {
+		fmt.Fprintf(w, ip[0])
+	}
+}
+
+type DNSResolved struct {
+	Addresses []string `json:"addresses" xml:"addresses" yaml:"addresses"`
 }
 
 func DoHealthCheck(w http.ResponseWriter, r *http.Request) {
@@ -55,11 +80,21 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
+func contains(arr []string, str string) bool {
+	for _, a := range arr {
+		if a == str {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", DoHealthCheck).Methods("GET")
-	// need to use non capturing group with (?:pattern) below because capturing group are not supported
+
+	// NOTE: need to use non capturing group with (?:pattern) below because capturing group are not supported
 	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", RollDice).Methods("GET")
 	router.HandleFunc("/dns/{domain}", DNSResolve).Methods("GET")
 
