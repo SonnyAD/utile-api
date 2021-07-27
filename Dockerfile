@@ -2,9 +2,9 @@ FROM golang:latest AS build
 WORKDIR /go/src
 
 COPY go.mod .
-COPY server.go .
+COPY *.go .
 RUN go get
-RUN CGO_ENABLED=0 go build server.go
+RUN CGO_ENABLED=0 go build -o server .
 
 FROM scratch AS runtime
 COPY --from=build /go/src/server /
