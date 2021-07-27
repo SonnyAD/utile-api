@@ -1,0 +1,160 @@
+openapi: 3.0.0
+info:
+  description: "This is an API for interacting with utile.space, the Swiss Army Knife webservices."
+  version: "0.0.1"
+  title: "Utile.space API"
+  contact:
+    email: "support@utile.space"
+servers:
+  - url: "https://utile.space/api"
+tags:
+- name: "general"
+  description: "General API operations"
+- name: "dice"
+  description: "Operations about dice rolls"
+- name: "dns"
+  description: "Operations about DNS resolution"
+- name: "password"
+  description: "Operations about password generation"
+paths:
+  /health:
+    get:
+      tags:
+      - "general"
+      summary: "Gets health status of the API."
+      description: "API health information."
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/health"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/health"
+            application/yaml:
+              schema:
+                $ref: "#/components/schemas/health"
+            text/plain:
+              schema: 
+                type: string
+                example: "up"                
+  /d{die}:
+    get:
+      tags:
+      - "dice"
+      summary: "Roll a die."
+      description: "Roll a die with n faces. With n between 2 and 100."
+      parameters:
+      - in: path
+        name: "die"
+        required: true
+        schema: 
+          type: integer
+          minimum: 2
+          maximum: 100
+      responses:
+        200:
+          description: "Roll result"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dieresult"
+            application/yaml:
+              schema:
+                $ref: "#/components/schemas/dieresult"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/dieresult"
+            text/plain:
+              schema:
+                type: string
+                example: 68
+        404:
+          description: "Die not found"
+          content:
+            text/plain:
+              schema: 
+                type: string
+                example: "Die not found"
+  /dns/{domain}:
+    get:
+      tags:
+      - "dns"
+      summary: ""
+      description: ""
+      parameters:
+      - in: path
+        name: "domain"
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: "Resolution"
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/dnsresolution"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/dnsresolution"
+            application/yaml:
+              schema:
+                $ref: "#/components/schemas/dnsresolution"
+            text/plain:
+              schema: 
+                type: string
+                example: "192.168.69.2"                
+            
+        404:
+          description: "Domain not found"
+          content:
+            text/plain:
+              schema: 
+                type: string
+                example: "Domain not found"          
+components:
+  schemas:
+    health:
+      required:
+        - status
+      properties:
+        version:
+          type: string
+          example: "1.0.1"
+        status:
+          type: string
+          enum: [up, maintenance]
+          example: "maintenance"
+    dieresult:
+      required: 
+        - die
+        - result
+      properties:
+        die: 
+          type: integer
+          minimum: 2
+          maximum: 100
+          description: "The number of faces of the die"
+          example: 100        
+        result:
+          type: integer
+          minimum: 2
+          maximum: 100   
+          description: "The value of the rolled die."
+          example: 68        
+    dnsresolution:
+      required:
+        - addresses
+      type: "object"
+      properties:
+        addresses:
+          type: array
+          items:
+            type: string
+          example: 
+            - "192.168.69.2"
+            - "192.168.69.5"
+          description: ""

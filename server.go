@@ -1,83 +1,53 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"log"
-	"math/rand"
-	"net"
 	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/yaml.v2"
 )
 
-func RollDice(w http.ResponseWriter, r *http.Request) {
+func EmptyResponse(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
 
 	enableCors(&w)
 
-	dice, err := strconv.Atoi(mux.Vars(r)["dice"])
+	var health Health
+	health.Status = "up"
 
-	if err != nil {
-		http.Error(w, "Unknown error", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintf(w, strconv.Itoa(rand.Intn(dice)+1))
+	output(w, r.Header["Accept"], health, health.Status)
 }
 
-func DNSResolve(w http.ResponseWriter, r *http.Request) {
-
-	enableCors(&w)
-
-	domain := mux.Vars(r)["domain"]
-
-	resolver := &net.Resolver{
-		PreferGo: true,
-		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-			d := net.Dialer{
-				Timeout: time.Millisecond * time.Duration(10000),
-			}
-			return d.DialContext(ctx, network, "1.1.1.1:53")
-		},
-	}
-
-	var dns DNSResolved
-
-	ip, _ := resolver.LookupHost(context.Background(), domain)
-
-	dns.Addresses = ip
-
-	if contains(r.Header["Accept"], "text/html") {
-		fmt.Fprintf(w, ip[0])
-	} else if contains(r.Header["Accept"], "application/json") {
-		reply, _ := json.Marshal(dns)
-		fmt.Fprintf(w, string(reply))
-	} else if contains(r.Header["Accept"], "application/xml") {
-		reply, _ := xml.Marshal(dns)
-		fmt.Fprintf(w, string(reply))
-	} else if contains(r.Header["Accept"], "application/yaml") {
-		reply, _ := yaml.Marshal(dns)
-		fmt.Fprintf(w, string(reply))
-	} else {
-		fmt.Fprintf(w, ip[0])
-	}
-}
-
-type DNSResolved struct {
-	Addresses []string `json:"addresses" xml:"addresses" yaml:"addresses"`
-}
-
-func DoHealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusAccepted)
+type Health struct {
+	XMLName xml.Name `xml:"health"`
+	Version string   `json:"version,omitempty" xml:"version,omitempty" yaml:"version,omitempty"`
+	Status  string   `json:"status" xml:"status" yaml:"status"`
 }
 
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
+func output(w http.ResponseWriter, accept []string, v interface{}, plain string) {
+	if contains(accept, "application/json") {
+		reply, _ := json.Marshal(v)
+		fmt.Fprintf(w, string(reply))
+	} else if contains(accept, "application/xml") {
+		reply, _ := xml.Marshal(v)
+		fmt.Fprintf(w, string(reply))
+	} else if contains(accept, "application/yaml") {
+		reply, _ := yaml.Marshal(v)
+		fmt.Fprintf(w, string(reply))
+	} else {
+		fmt.Fprintf(w, plain)
+	}
 }
 
 func contains(arr []string, str string) bool {
@@ -92,7 +62,8 @@ func contains(arr []string, str string) bool {
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", DoHealthCheck).Methods("GET")
+	router.HandleFunc("/", EmptyResponse).Methods("GET")
+	router.HandleFunc("/health", HealthCheck).Methods("GET")
 
 	// NOTE: need to use non capturing group with (?:pattern) below because capturing group are not supported
 	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", RollDice).Methods("GET")
