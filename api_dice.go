@@ -16,7 +16,7 @@ func RollDice(w http.ResponseWriter, r *http.Request) {
 	dice, err := strconv.Atoi(mux.Vars(r)["dice"])
 
 	if err != nil {
-		http.Error(w, "Unknown error", http.StatusInternalServerError)
+		http.Error(w, "Die not found", http.StatusNotFound)
 		return
 	}
 

@@ -26,7 +26,12 @@ func DNSResolve(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	ip, _ := resolver.LookupHost(context.Background(), domain)
+	ip, err := resolver.LookupHost(context.Background(), domain)
+
+	if err != nil {
+		http.Error(w, "Domain not found", http.StatusNotFound)
+		return
+	}
 
 	var dns DNSResolved
 	dns.Addresses = ip
