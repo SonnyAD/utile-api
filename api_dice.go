@@ -28,7 +28,7 @@ func RollDice(w http.ResponseWriter, r *http.Request) {
 }
 
 type DieResult struct {
-	XMLName xml.Name `xml:"dieresult"`
+	XMLName xml.Name `json:"-" xml:"dieresult" yaml:"-"`
 	Die     int      `json:"die" xml:"die" yaml:"die"`
 	Result  int      `json:"result" xml:"result" yaml:"result"`
 }

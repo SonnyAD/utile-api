@@ -40,6 +40,6 @@ func DNSResolve(w http.ResponseWriter, r *http.Request) {
 }
 
 type DNSResolved struct {
-	XMLName   xml.Name `xml:"dnsresolution"`
+	XMLName   xml.Name `json:"-" xml:"dnsresolution" yaml:"-"`
 	Addresses []string `json:"addresses" xml:"addresses" yaml:"addresses"`
 }

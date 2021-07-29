@@ -26,7 +26,7 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 type Health struct {
-	XMLName xml.Name `xml:"health"`
+	XMLName xml.Name `json:"-" xml:"health" yaml:"-"`
 	Version string   `json:"version,omitempty" xml:"version,omitempty" yaml:"version,omitempty"`
 	Status  string   `json:"status" xml:"status" yaml:"status"`
 }
