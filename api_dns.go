@@ -28,7 +28,7 @@ func DNSResolve(w http.ResponseWriter, r *http.Request) {
 
 	ip, err := resolver.LookupHost(context.Background(), domain)
 
-	if err != nil {
+	if err != nil || len(ip) == 0 {
 		http.Error(w, "Domain not found", http.StatusNotFound)
 		return
 	}
