@@ -68,6 +68,9 @@ func main() {
 	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", RollDice).Methods("GET")
 	router.HandleFunc("/dns/{domain}", DNSResolve).Methods("GET")
 	router.HandleFunc("/dns/mx/{domain}", MXResolve).Methods("GET")
+	router.HandleFunc("/dns/cname/{domain}", CNAMEResolve).Methods("GET")
+	router.HandleFunc("/dns/txt/{domain}", TXTResolve).Methods("GET")
+	router.HandleFunc("/dns/ns/{domain}", NSResolve).Methods("GET")
 
 	router.HandleFunc("/status", HealthCheck).Methods("GET")
 
