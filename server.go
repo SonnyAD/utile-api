@@ -63,11 +63,13 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", EmptyResponse).Methods("GET")
-	router.HandleFunc("/health", HealthCheck).Methods("GET")
 
 	// NOTE: need to use non capturing group with (?:pattern) below because capturing group are not supported
 	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", RollDice).Methods("GET")
 	router.HandleFunc("/dns/{domain}", DNSResolve).Methods("GET")
+	router.HandleFunc("/dns/mx/{domain}", MXResolve).Methods("GET")
+
+	router.HandleFunc("/status", HealthCheck).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":3000", router))
 }
