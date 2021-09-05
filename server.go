@@ -71,6 +71,7 @@ func main() {
 	router.HandleFunc("/dns/cname/{domain}", CNAMEResolve).Methods("GET")
 	router.HandleFunc("/dns/txt/{domain}", TXTResolve).Methods("GET")
 	router.HandleFunc("/dns/ns/{domain}", NSResolve).Methods("GET")
+	router.HandleFunc("/dns/caa/{domain}", CAAResolve).Methods("GET")
 
 	router.HandleFunc("/status", HealthCheck).Methods("GET")
 

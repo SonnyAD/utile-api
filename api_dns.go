@@ -6,10 +6,14 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/miekg/dns"
 )
+
+// AAAA, SRV, PTR, _dmarc.example.com
 
 //region DNS resolution
 func DNSResolve(w http.ResponseWriter, r *http.Request) {
@@ -221,6 +225,55 @@ func CNAMEResolve(w http.ResponseWriter, r *http.Request) {
 type CNAMEResolved struct {
 	XMLName xml.Name `json:"-" xml:"nsresolution" yaml:"-"`
 	Value   string   `json:"value" xml:"value" yaml:"value"`
+}
+
+//endregion
+
+//region CAA resolution
+func CAAResolve(w http.ResponseWriter, r *http.Request) {
+
+	enableCors(&w)
+
+	domain := mux.Vars(r)["domain"] + "."
+	c := new(dns.Client)
+	m := new(dns.Msg)
+	m.SetQuestion(domain, dns.TypeCAA)
+	result, _, err := c.Exchange(m, "1.1.1.1:53")
+	if err != nil {
+		http.Error(w, "Domain not found", http.StatusNotFound)
+		return
+	}
+	if result.Rcode != dns.RcodeSuccess || len(result.Answer) == 0 {
+		http.Error(w, "Domain not found", http.StatusNotFound)
+		return
+	}
+
+	var answer CAAResolved
+
+	records := make([]CAARecord, len(result.Answer))
+
+	for i, v := range result.Answer {
+		if caa, ok := v.(*dns.CAA); ok {
+			records[i].Flag = caa.Flag
+			records[i].Tag = caa.Tag
+			records[i].Value = caa.Value
+		}
+	}
+
+	answer.Records = records
+
+	output(w, r.Header["Accept"], answer, strconv.Itoa((int)(answer.Records[0].Flag))+" "+answer.Records[0].Tag+" "+answer.Records[0].Value)
+}
+
+type CAAResolved struct {
+	XMLName xml.Name    `json:"-" xml:"caaresolution" yaml:"-"`
+	Records []CAARecord `json:"records" xml:"record" yaml:"records"`
+}
+
+type CAARecord struct {
+	Flag  uint8  `json:"flag" xml:"flag" yaml:"flag"`
+	Tag   string `json:"tag" xml:"tag" yaml:"tag"`
+	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
 //endregion
