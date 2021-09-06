@@ -72,6 +72,9 @@ func main() {
 	router.HandleFunc("/dns/txt/{domain}", TXTResolve).Methods("GET")
 	router.HandleFunc("/dns/ns/{domain}", NSResolve).Methods("GET")
 	router.HandleFunc("/dns/caa/{domain}", CAAResolve).Methods("GET")
+	router.HandleFunc("/dns/aaaa/{domain}", AAAAResolve).Methods("GET")
+	router.HandleFunc("/dns/dmarc/{domain}", DMARCResolve).Methods("GET")
+	router.HandleFunc("/dns/ptr/{ip}", PTRResolve).Methods("GET")
 
 	router.HandleFunc("/status", HealthCheck).Methods("GET")
 
