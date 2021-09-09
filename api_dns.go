@@ -13,6 +13,12 @@ import (
 	"github.com/miekg/dns"
 )
 
+type DNSResolution struct {
+	XMLName    xml.Name    `json:"-" xml:"dns" yaml:"-"`
+	Type       string      `json:"type" xml:"type" yaml:"type"`
+	Resolution interface{} `json:"resolution" xml:"resolution" yaml:"resolution"`
+}
+
 //region DNS resolution
 func DNSResolve(w http.ResponseWriter, r *http.Request) {
 
@@ -41,11 +47,14 @@ func DNSResolve(w http.ResponseWriter, r *http.Request) {
 	var dns DNSResolved
 	dns.Addresses = ip
 
-	output(w, r.Header["Accept"], dns, dns.Addresses[0])
+	var reply DNSResolution
+	reply.Type = "dns"
+	reply.Resolution = dns
+
+	output(w, r.Header["Accept"], reply, dns.Addresses[0])
 }
 
 type DNSResolved struct {
-	XMLName   xml.Name `json:"-" xml:"dnsresolution" yaml:"-"`
 	Addresses []string `json:"addresses" xml:"address" yaml:"addresses"`
 }
 
@@ -87,13 +96,16 @@ func MXResolve(w http.ResponseWriter, r *http.Request) {
 
 	dns.Records = records
 
+	var reply DNSResolution
+	reply.Type = "mx"
+	reply.Resolution = dns
+
 	defaultOutput := fmt.Sprintf("%s %d", dns.Records[0].Host, dns.Records[0].Pref)
 
-	output(w, r.Header["Accept"], dns, defaultOutput)
+	output(w, r.Header["Accept"], reply, defaultOutput)
 }
 
 type MXResolved struct {
-	XMLName xml.Name   `json:"-" xml:"mxresolution" yaml:"-"`
 	Records []MXRecord `json:"records" xml:"record" yaml:"records"`
 }
 
@@ -139,12 +151,15 @@ func NSResolve(w http.ResponseWriter, r *http.Request) {
 
 	dns.Hosts = hosts
 
-	output(w, r.Header["Accept"], dns, dns.Hosts[0])
+	var reply DNSResolution
+	reply.Type = "ns"
+	reply.Resolution = dns
+
+	output(w, r.Header["Accept"], reply, dns.Hosts[0])
 }
 
 type NSResolved struct {
-	XMLName xml.Name `json:"-" xml:"nsresolution" yaml:"-"`
-	Hosts   []string `json:"hosts" xml:"host" yaml:"hosts"`
+	Hosts []string `json:"hosts" xml:"host" yaml:"hosts"`
 }
 
 //endregion
@@ -178,12 +193,15 @@ func TXTResolve(w http.ResponseWriter, r *http.Request) {
 
 	dns.Values = txt
 
-	output(w, r.Header["Accept"], dns, dns.Values[0])
+	var reply DNSResolution
+	reply.Type = "txt"
+	reply.Resolution = dns
+
+	output(w, r.Header["Accept"], reply, dns.Values[0])
 }
 
 type TXTResolved struct {
-	XMLName xml.Name `json:"-" xml:"nsresolution" yaml:"-"`
-	Values  []string `json:"values" xml:"value" yaml:"values"`
+	Values []string `json:"values" xml:"value" yaml:"values"`
 }
 
 //endregion
@@ -217,12 +235,15 @@ func CNAMEResolve(w http.ResponseWriter, r *http.Request) {
 
 	dns.Value = cname
 
-	output(w, r.Header["Accept"], dns, dns.Value)
+	var reply DNSResolution
+	reply.Type = "cname"
+	reply.Resolution = dns
+
+	output(w, r.Header["Accept"], reply, dns.Value)
 }
 
 type CNAMEResolved struct {
-	XMLName xml.Name `json:"-" xml:"nsresolution" yaml:"-"`
-	Value   string   `json:"value" xml:"value" yaml:"value"`
+	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
 //endregion
@@ -261,11 +282,14 @@ func CAAResolve(w http.ResponseWriter, r *http.Request) {
 
 	answer.Records = records
 
-	output(w, r.Header["Accept"], answer, strconv.Itoa((int)(answer.Records[0].Flag))+" "+answer.Records[0].Tag+" "+answer.Records[0].Value)
+	var reply DNSResolution
+	reply.Type = "caa"
+	reply.Resolution = answer
+
+	output(w, r.Header["Accept"], reply, strconv.Itoa((int)(answer.Records[0].Flag))+" "+answer.Records[0].Tag+" "+answer.Records[0].Value)
 }
 
 type CAAResolved struct {
-	XMLName xml.Name    `json:"-" xml:"caaresolution" yaml:"-"`
 	Records []CAARecord `json:"records" xml:"record" yaml:"records"`
 }
 
@@ -309,12 +333,15 @@ func AAAAResolve(w http.ResponseWriter, r *http.Request) {
 
 	answer.Hosts = hosts
 
-	output(w, r.Header["Accept"], answer, answer.Hosts[0])
+	var reply DNSResolution
+	reply.Type = "aaaa"
+	reply.Resolution = answer
+
+	output(w, r.Header["Accept"], reply, answer.Hosts[0])
 }
 
 type AAAAResolved struct {
-	XMLName xml.Name `json:"-" xml:"aaaaresolution" yaml:"-"`
-	Hosts   []string `json:"hosts" xml:"host" yaml:"hosts"`
+	Hosts []string `json:"hosts" xml:"host" yaml:"hosts"`
 }
 
 //endregion
@@ -348,12 +375,15 @@ func DMARCResolve(w http.ResponseWriter, r *http.Request) {
 
 	dns.Value = txt[0]
 
-	output(w, r.Header["Accept"], dns, dns.Value)
+	var reply DNSResolution
+	reply.Type = "dmarc"
+	reply.Resolution = dns
+
+	output(w, r.Header["Accept"], reply, dns.Value)
 }
 
 type DMARCResolved struct {
-	XMLName xml.Name `json:"-" xml:"dmarcresolution" yaml:"-"`
-	Value   string   `json:"value" xml:"value" yaml:"value"`
+	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
 //endregion
@@ -398,11 +428,14 @@ func PTRResolve(w http.ResponseWriter, r *http.Request) {
 
 	answer.Domains = domains
 
-	output(w, r.Header["Accept"], answer, answer.Domains[0])
+	var reply DNSResolution
+	reply.Type = "ptr"
+	reply.Resolution = answer
+
+	output(w, r.Header["Accept"], reply, answer.Domains[0])
 }
 
 type PTRResolved struct {
-	XMLName xml.Name `json:"-" xml:"ptrresolution" yaml:"-"`
 	Domains []string `json:"domains" xml:"domain" yaml:"domains"`
 }
 
