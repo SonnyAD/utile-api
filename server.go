@@ -75,6 +75,7 @@ func main() {
 	router.HandleFunc("/dns/aaaa/{domain}", AAAAResolve).Methods("GET")
 	router.HandleFunc("/dns/dmarc/{domain}", DMARCResolve).Methods("GET")
 	router.HandleFunc("/dns/ptr/{ip}", PTRResolve).Methods("GET")
+	router.HandleFunc("/links", GetLinksPage).Methods("GET")
 
 	router.HandleFunc("/status", HealthCheck).Methods("GET")
 
