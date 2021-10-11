@@ -66,10 +66,11 @@ func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 			links[i].Description = v.Properties.Description.Title[0].PlainText
 		}
 
-		tags := make([]string, len(v.Properties.Tags.MultiSelect))
+		tags := make([]Tag, len(v.Properties.Tags.MultiSelect))
 
 		for j, tag := range v.Properties.Tags.MultiSelect {
-			tags[j] = tag.Name
+			tags[j].Name = tag.Name
+			tags[j].Color = tag.Color
 		}
 		links[i].Tags = tags
 	}
@@ -86,9 +87,14 @@ type LinksPage struct {
 }
 
 type Link struct {
-	URL         string   `json:"url" xml:"url" yaml:"url"`
-	Description string   `json:"description" xml:"description" yaml:"description"`
-	Tags        []string `json:"tags" xml:"tags" yaml:"tags"`
+	URL         string `json:"url" xml:"url" yaml:"url"`
+	Description string `json:"description" xml:"description" yaml:"description"`
+	Tags        []Tag  `json:"tags" xml:"tag" yaml:"tags"`
+}
+
+type Tag struct {
+	Name  string `json:"name" xml:"name" yaml:"name"`
+	Color string `json:"color" xml:"color" yaml:"color"`
 }
 
 type NotionResponse struct {
