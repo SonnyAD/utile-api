@@ -23,12 +23,22 @@ func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	start := r.URL.Query().Get("start")
+	searchQuery := r.URL.Query().Get("search")
 	var filter string
 
-	if start != "" {
-		filter = "{\"filter\":{\"property\":\"On Telegram?\",\"checkbox\":{\"equals\":true}},\"start_cursor\":\"" + start + "\"}"
+	// TODO: This looks really bad, I should likely make some struct for that
+	if searchQuery != "" {
+		if start != "" {
+			filter = "{\"filter\":{\"and\":[{\"property\":\"On Telegram?\",\"checkbox\":{\"equals\":true}},{\"or\":[{\"property\":\"URL\",\"text\":{\"contains\":\"" + searchQuery + "\"}},{\"property\":\"URL\",\"text\":{\"contains\":\"" + searchQuery + "\"}}]}]},\"start_cursor\":\"" + start + "\"}"
+		} else {
+			filter = "{\"filter\":{\"and\":[{\"property\":\"On Telegram?\",\"checkbox\":{\"equals\":true}},{\"or\":[{\"property\":\"Description\",\"text\":{\"contains\":\"" + searchQuery + "\"}},{\"property\":\"URL\",\"text\":{\"contains\":\"" + searchQuery + "\"}}]}]}}"
+		}
 	} else {
-		filter = "{\"filter\":{\"property\":\"On Telegram?\",\"checkbox\":{\"equals\":true}}}"
+		if start != "" {
+			filter = "{\"filter\":{\"property\":\"On Telegram?\",\"checkbox\":{\"equals\":true}},\"start_cursor\":\"" + start + "\"}"
+		} else {
+			filter = "{\"filter\":{\"property\":\"On Telegram?\",\"checkbox\":{\"equals\":true}}}"
+		}
 	}
 
 	request, err := http.NewRequest("POST", "https://api.notion.com/v1/databases/"+databaseID+"/query", strings.NewReader(filter))
