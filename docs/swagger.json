@@ -1,0 +1,56 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "The collection of free API from utile.space, the Swiss Army Knife webtool.",
+        "title": "Utile.space Open API",
+        "contact": {
+            "name": "API Support",
+            "email": "support@utile.space"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://raw.githubusercontent.com/SonnyAD/utile-api/main/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "host": "utile.space",
+    "basePath": "/api",
+    "paths": {
+        "/status": {
+            "get": {
+                "description": "Get the status of the API",
+                "produces": [
+                    "application/json",
+                    "text/xml",
+                    "application/yaml",
+                    "text/plain"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Healthcheck",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Health"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.Health": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

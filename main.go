@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	_ "github.com/SonnyAD/utile-api/docs"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -15,12 +18,23 @@ func EmptyResponse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary		Healthcheck
+// @Description	Get the status of the API
+// @Tags			health
+// @Produce		json,xml,application/yaml,plain
+// @Success		200	{object}	Health
+// @Router			/status [get]
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
 
 	enableCors(&w)
 
 	var health Health
 	health.Status = "up"
+
+	version, present := os.LookupEnv("API_VERSION")
+	if present {
+		health.Version = version
+	}
 
 	output(w, r.Header["Accept"], health, health.Status)
 }
@@ -59,6 +73,18 @@ func contains(arr []string, str string) bool {
 	return false
 }
 
+//	@title			Utile.space Open API
+//	@version		1.0
+//	@description	The collection of free API from utile.space, the Swiss Army Knife webtool.
+
+//	@contact.name	API Support
+//	@contact.email	support@utile.space
+
+//	@license.name	MIT License
+//	@license.url	https://raw.githubusercontent.com/SonnyAD/utile-api/main/LICENSE
+
+// @host		utile.space
+// @BasePath	/api
 func main() {
 	router := mux.NewRouter()
 
@@ -78,6 +104,8 @@ func main() {
 	router.HandleFunc("/links", GetLinksPage).Methods("GET")
 
 	router.HandleFunc("/status", HealthCheck).Methods("GET")
+
+	router.HandleFunc("/swagger", httpSwagger.Handler()).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":3000", router))
 }

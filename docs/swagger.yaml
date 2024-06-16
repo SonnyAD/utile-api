@@ -1,0 +1,38 @@
+basePath: /api
+definitions:
+  main.Health:
+    properties:
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+host: utile.space
+info:
+  contact:
+    email: support@utile.space
+    name: API Support
+  description: The collection of free API from utile.space, the Swiss Army Knife webtool.
+  license:
+    name: MIT License
+    url: https://raw.githubusercontent.com/SonnyAD/utile-api/main/LICENSE
+  title: Utile.space Open API
+  version: "1.0"
+paths:
+  /status:
+    get:
+      description: Get the status of the API
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Health'
+      summary: Healthcheck
+      tags:
+      - health
+swagger: "2.0"
