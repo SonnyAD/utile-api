@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -8,11 +8,21 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"utile.space/api/utils"
 )
 
+// @Summary		Get Recommended Links Page
+// @Description	Returns a page of recommended links by SonnyAD
+// @Tags			links
+// @Produce		json,xml,application/yaml,plain
+// @Param			start	query		string	false	"Start cursor for pagination"
+// @Param			search	query		string	false	"Search filter"
+// @Success		200		{object}	LinksPage
+// @Router			/links [get]
 func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	databaseID := os.Getenv("NOTION_DATABASE_ID")
 	notionAPISecret := os.Getenv("NOTION_SECRET")
@@ -87,7 +97,7 @@ func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 
 	reply.Links = links
 
-	output(w, r.Header["Accept"], reply, "Please use JSON")
+	utils.Output(w, r.Header["Accept"], reply, "Please use JSON")
 }
 
 type LinksPage struct {

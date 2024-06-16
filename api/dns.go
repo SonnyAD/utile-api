@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/miekg/dns"
+	"utile.space/api/utils"
 )
 
 type DNSResolution struct {
@@ -19,10 +20,16 @@ type DNSResolution struct {
 	Resolution interface{} `json:"resolution" xml:"resolution" yaml:"resolution"`
 }
 
-//region DNS resolution
+//	@Summary		DNS resolution
+//	@Description	Resolves a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/{domain} [get]
 func DNSResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	domain := mux.Vars(r)["domain"]
 
@@ -51,19 +58,23 @@ func DNSResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "dns"
 	reply.Resolution = dns
 
-	output(w, r.Header["Accept"], reply, dns.Addresses[0])
+	utils.Output(w, r.Header["Accept"], reply, dns.Addresses[0])
 }
 
 type DNSResolved struct {
 	Addresses []string `json:"addresses" xml:"address" yaml:"addresses"`
 }
 
-//endregion
-
-//region MX resolution
+//	@Summary		MX resolution
+//	@Description	Resolves MX records of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/mx/{domain} [get]
 func MXResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	domain := mux.Vars(r)["domain"]
 
@@ -102,7 +113,7 @@ func MXResolve(w http.ResponseWriter, r *http.Request) {
 
 	defaultOutput := fmt.Sprintf("%s %d", dns.Records[0].Host, dns.Records[0].Pref)
 
-	output(w, r.Header["Accept"], reply, defaultOutput)
+	utils.Output(w, r.Header["Accept"], reply, defaultOutput)
 }
 
 type MXResolved struct {
@@ -114,12 +125,16 @@ type MXRecord struct {
 	Pref uint16 `json:"pref" xml:"pref" yaml:"pref"`
 }
 
-//endregion
-
-//region NS resolution
+//	@Summary		NS resolution
+//	@Description	Resolves the name servers of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/ns/{domain} [get]
 func NSResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	domain := mux.Vars(r)["domain"]
 
@@ -155,19 +170,23 @@ func NSResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "ns"
 	reply.Resolution = dns
 
-	output(w, r.Header["Accept"], reply, dns.Hosts[0])
+	utils.Output(w, r.Header["Accept"], reply, dns.Hosts[0])
 }
 
 type NSResolved struct {
 	Hosts []string `json:"hosts" xml:"host" yaml:"hosts"`
 }
 
-//endregion
-
-//region TXT resolution
+//	@Summary		TXT resolution
+//	@Description	Resolves TXT records of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/txt/{domain} [get]
 func TXTResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	domain := mux.Vars(r)["domain"]
 
@@ -197,19 +216,23 @@ func TXTResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "txt"
 	reply.Resolution = dns
 
-	output(w, r.Header["Accept"], reply, dns.Values[0])
+	utils.Output(w, r.Header["Accept"], reply, dns.Values[0])
 }
 
 type TXTResolved struct {
 	Values []string `json:"values" xml:"value" yaml:"values"`
 }
 
-//endregion
-
-//region CNAME resolution
+//	@Summary		CNAME resolution
+//	@Description	Resolves CNAME records of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/cname/{domain} [get]
 func CNAMEResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	domain := mux.Vars(r)["domain"]
 
@@ -239,19 +262,23 @@ func CNAMEResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "cname"
 	reply.Resolution = dns
 
-	output(w, r.Header["Accept"], reply, dns.Value)
+	utils.Output(w, r.Header["Accept"], reply, dns.Value)
 }
 
 type CNAMEResolved struct {
 	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
-//endregion
-
-//region CAA resolution
+//	@Summary		CAA resolution
+//	@Description	Resolves CAA records of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/caa/{domain} [get]
 func CAAResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	// NOTE: Adding a dot at the end because the dns library is expecting a FQDN
 	domain := mux.Vars(r)["domain"] + "."
@@ -286,7 +313,7 @@ func CAAResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "caa"
 	reply.Resolution = answer
 
-	output(w, r.Header["Accept"], reply, strconv.Itoa((int)(answer.Records[0].Flag))+" "+answer.Records[0].Tag+" "+answer.Records[0].Value)
+	utils.Output(w, r.Header["Accept"], reply, strconv.Itoa((int)(answer.Records[0].Flag))+" "+answer.Records[0].Tag+" "+answer.Records[0].Value)
 }
 
 type CAAResolved struct {
@@ -299,12 +326,16 @@ type CAARecord struct {
 	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
-//endregion
-
-//region AAAA resolution
+//	@Summary		AAAA resolution
+//	@Description	Resolves AAAA records (IPv6) of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/aaaa/{domain} [get]
 func AAAAResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	// NOTE: Adding a dot at the end because the dns library is expecting a FQDN
 	domain := mux.Vars(r)["domain"] + "."
@@ -337,19 +368,23 @@ func AAAAResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "aaaa"
 	reply.Resolution = answer
 
-	output(w, r.Header["Accept"], reply, answer.Hosts[0])
+	utils.Output(w, r.Header["Accept"], reply, answer.Hosts[0])
 }
 
 type AAAAResolved struct {
 	Hosts []string `json:"hosts" xml:"host" yaml:"hosts"`
 }
 
-//endregion
-
-//region DMARC resolution
+//	@Summary		DMARC resolution
+//	@Description	Resolves DMARC TXT records of a given domain name
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			domain	path		string	true	"Domain to resolve"
+//	@Success		200		{object}	DNSResolution
+//	@Router			/dns/dmarc/{domain} [get]
 func DMARCResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	domain := "_dmarc." + mux.Vars(r)["domain"]
 
@@ -379,19 +414,23 @@ func DMARCResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "dmarc"
 	reply.Resolution = dns
 
-	output(w, r.Header["Accept"], reply, dns.Value)
+	utils.Output(w, r.Header["Accept"], reply, dns.Value)
 }
 
 type DMARCResolved struct {
 	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
-//endregion
-
-//region PTR resolution
+//	@Summary		PTR resolution
+//	@Description	Resolves a domain name for a given IP address
+//	@Tags			dns
+//	@Produce		json,xml,application/yaml,plain
+//	@Param			ip	path		string	true	"IP address"
+//	@Success		200	{object}	DNSResolution
+//	@Router			/dns/ptr/{ip} [get]
 func PTRResolve(w http.ResponseWriter, r *http.Request) {
 
-	enableCors(&w)
+	utils.EnableCors(&w)
 
 	ip := mux.Vars(r)["ip"]
 
@@ -432,11 +471,9 @@ func PTRResolve(w http.ResponseWriter, r *http.Request) {
 	reply.Type = "ptr"
 	reply.Resolution = answer
 
-	output(w, r.Header["Accept"], reply, answer.Domains[0])
+	utils.Output(w, r.Header["Accept"], reply, answer.Domains[0])
 }
 
 type PTRResolved struct {
 	Domains []string `json:"domains" xml:"domain" yaml:"domains"`
 }
-
-//endregion

@@ -1,5 +1,45 @@
 basePath: /api
 definitions:
+  api.DNSResolution:
+    properties:
+      resolution: {}
+      type:
+        type: string
+    type: object
+  api.DieResult:
+    properties:
+      die:
+        type: integer
+      result:
+        type: integer
+    type: object
+  api.Link:
+    properties:
+      description:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/api.Tag'
+        type: array
+      url:
+        type: string
+    type: object
+  api.LinksPage:
+    properties:
+      links:
+        items:
+          $ref: '#/definitions/api.Link'
+        type: array
+      next:
+        type: string
+    type: object
+  api.Tag:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+    type: object
   main.Health:
     properties:
       status:
@@ -7,7 +47,6 @@ definitions:
       version:
         type: string
     type: object
-host: utile.space
 info:
   contact:
     email: support@utile.space
@@ -19,6 +58,251 @@ info:
   title: Utile.space Open API
   version: "1.0"
 paths:
+  /d{dice}:
+    get:
+      description: Endpoint to roll a dice of the given number of faces
+      parameters:
+      - description: Number of faces of the dice between 2 and 100
+        in: path
+        name: dice
+        required: true
+        type: integer
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DieResult'
+      summary: Roll a dice
+      tags:
+      - dice
+  /dns/{domain}:
+    get:
+      description: Resolves a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: DNS resolution
+      tags:
+      - dns
+  /dns/aaaa/{domain}:
+    get:
+      description: Resolves AAAA records (IPv6) of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: AAAA resolution
+      tags:
+      - dns
+  /dns/caa/{domain}:
+    get:
+      description: Resolves CAA records of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: CAA resolution
+      tags:
+      - dns
+  /dns/cname/{domain}:
+    get:
+      description: Resolves CNAME records of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: CNAME resolution
+      tags:
+      - dns
+  /dns/dmarc/{domain}:
+    get:
+      description: Resolves DMARC TXT records of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: DMARC resolution
+      tags:
+      - dns
+  /dns/mx/{domain}:
+    get:
+      description: Resolves MX records of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: MX resolution
+      tags:
+      - dns
+  /dns/ns/{domain}:
+    get:
+      description: Resolves the name servers of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: NS resolution
+      tags:
+      - dns
+  /dns/ptr/{ip}:
+    get:
+      description: Resolves a domain name for a given IP address
+      parameters:
+      - description: IP address
+        in: path
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: PTR resolution
+      tags:
+      - dns
+  /dns/txt/{domain}:
+    get:
+      description: Resolves TXT records of a given domain name
+      parameters:
+      - description: Domain to resolve
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DNSResolution'
+      summary: TXT resolution
+      tags:
+      - dns
+  /links:
+    get:
+      description: Returns a page of recommended links by SonnyAD
+      parameters:
+      - description: Start cursor for pagination
+        in: query
+        name: start
+        type: string
+      - description: Search filter
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.LinksPage'
+      summary: Get Recommended Links Page
+      tags:
+      - links
   /status:
     get:
       description: Get the status of the API

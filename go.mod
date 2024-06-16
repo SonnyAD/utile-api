@@ -1,4 +1,4 @@
-module github.com/SonnyAD/utile-api
+module utile.space/api
 
 go 1.21
 
