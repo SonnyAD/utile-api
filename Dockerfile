@@ -4,7 +4,7 @@ WORKDIR /app
 RUN apk add -U --no-cache ca-certificates
 
 COPY . .
-RUN go vet
+RUN CGO_ENABLED=0 go vet
 RUN CGO_ENABLED=0 go build -o server .
 
 
