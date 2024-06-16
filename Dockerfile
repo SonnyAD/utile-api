@@ -3,7 +3,7 @@ WORKDIR /app
 
 RUN apk add -U --no-cache ca-certificates
 
-COPY * ./
+COPY . .
 RUN CGO_ENABLED=0 go build -o server .
 
 
