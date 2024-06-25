@@ -49,13 +49,13 @@ definitions:
     type: object
 info:
   contact:
-    email: support@utile.space
+    email: api@utile.space
     name: API Support
   description: The collection of free API from utile.space, the Swiss Army Knife webtool.
   license:
-    name: MIT License
-    url: https://raw.githubusercontent.com/SonnyAD/utile-api/main/LICENSE
-  title: Utile.space Open API
+    name: utile.space API License
+    url: https://utile.space/api/
+  title: utile.space Open API
   version: "1.0"
 paths:
   /d{dice}:

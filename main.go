@@ -44,36 +44,36 @@ type Health struct {
 	Status  string   `json:"status" xml:"status" yaml:"status"`
 }
 
-// @title			Utile.space Open API
+// @title			utile.space Open API
 // @version		1.0
 // @description	The collection of free API from utile.space, the Swiss Army Knife webtool.
 //
 // @contact.name	API Support
-// @contact.email	support@utile.space
+// @contact.email	api@utile.space
 //
-// @license.name	MIT License
-// @license.url	https://raw.githubusercontent.com/SonnyAD/utile-api/main/LICENSE
+// @license.name	utile.space API License
+// @license.url	https://utile.space/api/
 //
 // @BasePath		/api
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", EmptyResponse).Methods("GET")
+	router.HandleFunc("/", EmptyResponse).Methods(http.MethodGet)
 
 	// NOTE: need to use non capturing group with (?:pattern) below because capturing group are not supported
-	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", api.RollDice).Methods("GET")
-	router.HandleFunc("/dns/{domain}", api.DNSResolve).Methods("GET")
-	router.HandleFunc("/dns/mx/{domain}", api.MXResolve).Methods("GET")
-	router.HandleFunc("/dns/cname/{domain}", api.CNAMEResolve).Methods("GET")
-	router.HandleFunc("/dns/txt/{domain}", api.TXTResolve).Methods("GET")
-	router.HandleFunc("/dns/ns/{domain}", api.NSResolve).Methods("GET")
-	router.HandleFunc("/dns/caa/{domain}", api.CAAResolve).Methods("GET")
-	router.HandleFunc("/dns/aaaa/{domain}", api.AAAAResolve).Methods("GET")
-	router.HandleFunc("/dns/dmarc/{domain}", api.DMARCResolve).Methods("GET")
-	router.HandleFunc("/dns/ptr/{ip}", api.PTRResolve).Methods("GET")
-	router.HandleFunc("/links", api.GetLinksPage).Methods("GET")
+	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", api.RollDice).Methods(http.MethodGet)
+	router.HandleFunc("/dns/{domain}", api.DNSResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/mx/{domain}", api.MXResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/cname/{domain}", api.CNAMEResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/txt/{domain}", api.TXTResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/ns/{domain}", api.NSResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/caa/{domain}", api.CAAResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/aaaa/{domain}", api.AAAAResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/dmarc/{domain}", api.DMARCResolve).Methods(http.MethodGet)
+	router.HandleFunc("/dns/ptr/{ip}", api.PTRResolve).Methods(http.MethodGet)
+	router.HandleFunc("/links", api.GetLinksPage).Methods(http.MethodGet)
 
-	router.HandleFunc("/status", HealthCheck).Methods("GET")
+	router.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
 
 	router.PathPrefix("/docs/").Handler(httpSwagger.Handler(
 		httpSwagger.DeepLinking(true),
@@ -81,5 +81,10 @@ func main() {
 		httpSwagger.DomID("swagger-ui"),
 	)).Methods(http.MethodGet)
 
-	log.Fatal(http.ListenAndServe(":3000", router))
+	port, present := os.LookupEnv("PORT")
+	if !present {
+		port = "3000"
+	}
+
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

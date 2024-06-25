@@ -11,11 +11,11 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "API Support",
-            "email": "support@utile.space"
+            "email": "api@utile.space"
         },
         "license": {
-            "name": "MIT License",
-            "url": "https://raw.githubusercontent.com/SonnyAD/utile-api/main/LICENSE"
+            "name": "utile.space API License",
+            "url": "https://utile.space/api/"
         },
         "version": "{{.Version}}"
     },
@@ -486,7 +486,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Utile.space Open API",
+	Title:            "utile.space Open API",
 	Description:      "The collection of free API from utile.space, the Swiss Army Knife webtool.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
