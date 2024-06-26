@@ -58,24 +58,27 @@ type Health struct {
 func main() {
 	router := mux.NewRouter()
 
+	apiRouter := router.PathPrefix("/api").Subrouter()
+
 	router.HandleFunc("/", EmptyResponse).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/", EmptyResponse).Methods(http.MethodGet)
 
 	// NOTE: need to use non capturing group with (?:pattern) below because capturing group are not supported
-	router.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", api.RollDice).Methods(http.MethodGet)
-	router.HandleFunc("/dns/{domain}", api.DNSResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/mx/{domain}", api.MXResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/cname/{domain}", api.CNAMEResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/txt/{domain}", api.TXTResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/ns/{domain}", api.NSResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/caa/{domain}", api.CAAResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/aaaa/{domain}", api.AAAAResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/dmarc/{domain}", api.DMARCResolve).Methods(http.MethodGet)
-	router.HandleFunc("/dns/ptr/{ip}", api.PTRResolve).Methods(http.MethodGet)
-	router.HandleFunc("/links", api.GetLinksPage).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/d{dice:(?:100|1[0-9]|[2-9][0-9]?)}", api.RollDice).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/{domain}", api.DNSResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/mx/{domain}", api.MXResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/cname/{domain}", api.CNAMEResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/txt/{domain}", api.TXTResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/ns/{domain}", api.NSResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/caa/{domain}", api.CAAResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/aaaa/{domain}", api.AAAAResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/dmarc/{domain}", api.DMARCResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/dns/ptr/{ip}", api.PTRResolve).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/links", api.GetLinksPage).Methods(http.MethodGet)
 
-	router.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
 
-	router.PathPrefix("/docs/").Handler(httpSwagger.Handler(
+	apiRouter.PathPrefix("/docs/").Handler(httpSwagger.Handler(
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
 		httpSwagger.DomID("swagger-ui"),
