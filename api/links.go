@@ -64,14 +64,19 @@ func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 	resp, err := client.Do(request)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	defer resp.Body.Close()
 
 	var res NotionResponse
 
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		log.Print(err)
+		return
+	}
 
 	var reply LinksPage
 

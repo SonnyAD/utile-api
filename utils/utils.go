@@ -16,15 +16,15 @@ func EnableCors(w *http.ResponseWriter) {
 func Output(w http.ResponseWriter, accept []string, v interface{}, plain string) {
 	if contains(accept, "application/json") {
 		reply, _ := json.Marshal(v)
-		fmt.Fprintf(w, string(reply))
+		fmt.Fprint(w, string(reply))
 	} else if contains(accept, "application/xml") {
 		reply, _ := xml.Marshal(v)
-		fmt.Fprintf(w, string(reply))
+		fmt.Fprint(w, string(reply))
 	} else if contains(accept, "application/yaml") {
 		reply, _ := yaml.Marshal(v)
-		fmt.Fprintf(w, string(reply))
+		fmt.Fprint(w, string(reply))
 	} else {
-		fmt.Fprintf(w, plain)
+		fmt.Fprint(w, plain)
 	}
 }
 
