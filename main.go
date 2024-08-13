@@ -24,9 +24,6 @@ func EmptyResponse(w http.ResponseWriter, r *http.Request) {
 // @Success		200	{object}	Health
 // @Router			/status [get]
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	var health Health
 	health.Status = "up"
 
@@ -57,6 +54,8 @@ type Health struct {
 // @BasePath		/api
 func main() {
 	router := mux.NewRouter()
+
+	router.Use(utils.EnableCors)
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
 

@@ -9,8 +9,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func EnableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+func EnableCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	})
 }
 
 func Output(w http.ResponseWriter, accept []string, v interface{}, plain string) {

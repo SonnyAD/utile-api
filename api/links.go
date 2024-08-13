@@ -21,9 +21,6 @@ import (
 // @Success		200		{object}	LinksPage
 // @Router			/links [get]
 func GetLinksPage(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	databaseID := os.Getenv("NOTION_DATABASE_ID")
 	notionAPISecret := os.Getenv("NOTION_SECRET")
 

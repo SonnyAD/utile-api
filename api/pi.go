@@ -107,13 +107,11 @@ func chudnovskyTau(n int) *big.Float {
 // @Success		200	{object}	BigNumberResult
 // @Router			/pi [get]
 func CalculatePi(w http.ResponseWriter, r *http.Request) {
-	utils.EnableCors(&w)
-
 	pi := chudnovsky(10000)
 
 	var answer BigNumberResult
 	answer.Name = "Pi"
-	answer.Value = fmt.Sprintf("%.10000f\n", pi)
+	answer.Value = fmt.Sprintf("%.10000f", pi)
 
 	utils.Output(w, r.Header["Accept"], answer, answer.Value)
 }
@@ -125,13 +123,11 @@ func CalculatePi(w http.ResponseWriter, r *http.Request) {
 // @Success		200	{object}	BigNumberResult
 // @Router			/tau [get]
 func CalculateTau(w http.ResponseWriter, r *http.Request) {
-	utils.EnableCors(&w)
-
 	tau := chudnovskyTau(10000)
 
 	var answer BigNumberResult
 	answer.Name = "Tau"
-	answer.Value = fmt.Sprintf("%.10000f\n", tau)
+	answer.Value = fmt.Sprintf("%.10000f", tau)
 
 	utils.Output(w, r.Header["Accept"], answer, answer.Value)
 }

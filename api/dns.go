@@ -20,17 +20,14 @@ type DNSResolution struct {
 	Resolution interface{} `json:"resolution" xml:"resolution" yaml:"resolution"`
 }
 
-//	@Summary		DNS resolution
-//	@Description	Resolves a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/{domain} [get]
+// @Summary		DNS resolution
+// @Description	Resolves a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/{domain} [get]
 func DNSResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	domain := mux.Vars(r)["domain"]
 
 	// Details: https://pkg.go.dev/net#Resolver.LookupHost
@@ -65,17 +62,14 @@ type DNSResolved struct {
 	Addresses []string `json:"addresses" xml:"address" yaml:"addresses"`
 }
 
-//	@Summary		MX resolution
-//	@Description	Resolves MX records of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/mx/{domain} [get]
+// @Summary		MX resolution
+// @Description	Resolves MX records of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/mx/{domain} [get]
 func MXResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	domain := mux.Vars(r)["domain"]
 
 	// Details: https://pkg.go.dev/net#Resolver.LookupMX
@@ -125,17 +119,14 @@ type MXRecord struct {
 	Pref uint16 `json:"pref" xml:"pref" yaml:"pref"`
 }
 
-//	@Summary		NS resolution
-//	@Description	Resolves the name servers of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/ns/{domain} [get]
+// @Summary		NS resolution
+// @Description	Resolves the name servers of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/ns/{domain} [get]
 func NSResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	domain := mux.Vars(r)["domain"]
 
 	// Details: https://pkg.go.dev/net#Resolver.LookupNS
@@ -177,17 +168,14 @@ type NSResolved struct {
 	Hosts []string `json:"hosts" xml:"host" yaml:"hosts"`
 }
 
-//	@Summary		TXT resolution
-//	@Description	Resolves TXT records of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/txt/{domain} [get]
+// @Summary		TXT resolution
+// @Description	Resolves TXT records of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/txt/{domain} [get]
 func TXTResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	domain := mux.Vars(r)["domain"]
 
 	// Details: https://pkg.go.dev/net#Resolver.LookupTXT
@@ -223,17 +211,14 @@ type TXTResolved struct {
 	Values []string `json:"values" xml:"value" yaml:"values"`
 }
 
-//	@Summary		CNAME resolution
-//	@Description	Resolves CNAME records of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/cname/{domain} [get]
+// @Summary		CNAME resolution
+// @Description	Resolves CNAME records of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/cname/{domain} [get]
 func CNAMEResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	domain := mux.Vars(r)["domain"]
 
 	// Details: https://pkg.go.dev/net#Resolver.LookupCNAME
@@ -269,17 +254,14 @@ type CNAMEResolved struct {
 	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
-//	@Summary		CAA resolution
-//	@Description	Resolves CAA records of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/caa/{domain} [get]
+// @Summary		CAA resolution
+// @Description	Resolves CAA records of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/caa/{domain} [get]
 func CAAResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	// NOTE: Adding a dot at the end because the dns library is expecting a FQDN
 	domain := mux.Vars(r)["domain"] + "."
 	c := new(dns.Client)
@@ -326,17 +308,14 @@ type CAARecord struct {
 	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
-//	@Summary		AAAA resolution
-//	@Description	Resolves AAAA records (IPv6) of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/aaaa/{domain} [get]
+// @Summary		AAAA resolution
+// @Description	Resolves AAAA records (IPv6) of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/aaaa/{domain} [get]
 func AAAAResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	// NOTE: Adding a dot at the end because the dns library is expecting a FQDN
 	domain := mux.Vars(r)["domain"] + "."
 	c := new(dns.Client)
@@ -375,17 +354,14 @@ type AAAAResolved struct {
 	Hosts []string `json:"hosts" xml:"host" yaml:"hosts"`
 }
 
-//	@Summary		DMARC resolution
-//	@Description	Resolves DMARC TXT records of a given domain name
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			domain	path		string	true	"Domain to resolve"
-//	@Success		200		{object}	DNSResolution
-//	@Router			/dns/dmarc/{domain} [get]
+// @Summary		DMARC resolution
+// @Description	Resolves DMARC TXT records of a given domain name
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			domain	path		string	true	"Domain to resolve"
+// @Success		200		{object}	DNSResolution
+// @Router			/dns/dmarc/{domain} [get]
 func DMARCResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	domain := "_dmarc." + mux.Vars(r)["domain"]
 
 	// Details: https://pkg.go.dev/net#Resolver.LookupTXT
@@ -421,17 +397,14 @@ type DMARCResolved struct {
 	Value string `json:"value" xml:"value" yaml:"value"`
 }
 
-//	@Summary		PTR resolution
-//	@Description	Resolves a domain name for a given IP address
-//	@Tags			dns
-//	@Produce		json,xml,application/yaml,plain
-//	@Param			ip	path		string	true	"IP address"
-//	@Success		200	{object}	DNSResolution
-//	@Router			/dns/ptr/{ip} [get]
+// @Summary		PTR resolution
+// @Description	Resolves a domain name for a given IP address
+// @Tags			dns
+// @Produce		json,xml,application/yaml,plain
+// @Param			ip	path		string	true	"IP address"
+// @Success		200	{object}	DNSResolution
+// @Router			/dns/ptr/{ip} [get]
 func PTRResolve(w http.ResponseWriter, r *http.Request) {
-
-	utils.EnableCors(&w)
-
 	ip := mux.Vars(r)["ip"]
 
 	// NOTE: First convert IP to ARPA Hostname
