@@ -22,11 +22,9 @@ func newBigFloat(v float64) *big.Float {
 func binarySplit(a int, b int) (*big.Float, *big.Float, *big.Float) {
 	var Pab, Qab, Rab *big.Float
 
-	o := newBigFloat(1)
-
-	A := newBigFloat(float64(a))
-
 	if b == a+1 {
+		A := newBigFloat(float64(a))
+		o := newBigFloat(1)
 		i := newBigFloat(10939058860032000)
 		j := newBigFloat(545140134)
 		k := newBigFloat(13591409)
@@ -34,22 +32,19 @@ func binarySplit(a int, b int) (*big.Float, *big.Float, *big.Float) {
 		f := newBigFloat(0).Set(o.Add(o.Mul(newBigFloat(2), A), newBigFloat(-1)))
 		g := newBigFloat(0).Set(o.Add(o.Mul(newBigFloat(6), A), newBigFloat(-1)))
 
-		Pab = newBigFloat(1)
-		Pab = Pab.Mul(Pab, e)
-		Pab = Pab.Mul(Pab, f)
-		Pab = Pab.Mul(Pab, g)
-		Pab = Pab.Mul(Pab, newBigFloat(-1))
+		Pab = newBigFloat(-1)
+		Pab.Mul(Pab, e)
+		Pab.Mul(Pab, f)
+		Pab.Mul(Pab, g)
 
-		Qab = newBigFloat(1)
-		Qab = Qab.Mul(Qab, i)
-		Qab = Qab.Mul(Qab, cube(A))
+		Qab = i.Mul(i, cube(A))
 
 		Rab = newBigFloat(1)
-		Rab = Rab.Mul(Rab, Pab)
+		Rab.Mul(Rab, Pab)
 
 		j.Mul(j, A)
 		j.Add(j, k)
-		Rab = Rab.Mul(Rab, j)
+		Rab.Mul(Rab, j)
 	} else {
 		m := (a + b) / 2
 		Pam, Qam, Ram := binarySplit(a, m)
@@ -72,9 +67,9 @@ func binarySplit(a int, b int) (*big.Float, *big.Float, *big.Float) {
 
 func cube(v *big.Float) *big.Float {
 	result := newBigFloat(1)
-	result = result.Mul(result, v)
-	result = result.Mul(result, v)
-	result = result.Mul(result, v)
+	result.Mul(result, v)
+	result.Mul(result, v)
+	result.Mul(result, v)
 	return result
 }
 
