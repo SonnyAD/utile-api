@@ -112,9 +112,10 @@ func CalculatePi(w http.ResponseWriter, r *http.Request) {
 	pi := chudnovsky(10000)
 
 	var answer BigNumberResult
-	answer.Result = fmt.Sprintf("%.10000f\n", pi)
+	answer.Name = "Pi"
+	answer.Value = fmt.Sprintf("%.10000f\n", pi)
 
-	utils.Output(w, r.Header["Accept"], r, answer.Result)
+	utils.Output(w, r.Header["Accept"], answer, answer.Value)
 }
 
 // @Summary		Tau Value
@@ -126,15 +127,17 @@ func CalculatePi(w http.ResponseWriter, r *http.Request) {
 func CalculateTau(w http.ResponseWriter, r *http.Request) {
 	utils.EnableCors(&w)
 
-	pi := chudnovskyTau(10000)
+	tau := chudnovskyTau(10000)
 
 	var answer BigNumberResult
-	answer.Result = fmt.Sprintf("%.10000f\n", pi)
+	answer.Name = "Tau"
+	answer.Value = fmt.Sprintf("%.10000f\n", tau)
 
-	utils.Output(w, r.Header["Accept"], r, answer.Result)
+	utils.Output(w, r.Header["Accept"], answer, answer.Value)
 }
 
 type BigNumberResult struct {
-	XMLName xml.Name `json:"-" xml:"dieresult" yaml:"-"`
-	Result  string   `json:"result" xml:"result" yaml:"result"`
+	XMLName xml.Name `json:"-" xml:"bignumber" yaml:"-"`
+	Name    string   `json:"name" xml:"name" yaml:"name"`
+	Value   string   `json:"value" xml:"value" yaml:"value"`
 }

@@ -453,7 +453,10 @@ const docTemplate = `{
         "api.BigNumberResult": {
             "type": "object",
             "properties": {
-                "result": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }

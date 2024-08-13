@@ -2,7 +2,9 @@ basePath: /api
 definitions:
   api.BigNumberResult:
     properties:
-      result:
+      name:
+        type: string
+      value:
         type: string
     type: object
   api.DNSResolution:
