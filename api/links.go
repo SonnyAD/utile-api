@@ -48,7 +48,7 @@ func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	request, err := http.NewRequest("POST", "https://api.notion.com/v1/databases/"+databaseID+"/query", strings.NewReader(filter))
+	request, err := http.NewRequestWithContext(r.Context(), "POST", "https://api.notion.com/v1/databases/"+databaseID+"/query", strings.NewReader(filter))
 
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +65,12 @@ func GetLinksPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Print(err)
+		}
+	}()
 
 	var res NotionResponse
 
