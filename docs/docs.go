@@ -379,6 +379,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/pi": {
+            "get": {
+                "description": "Calculate Pi value up to 10K decimals",
+                "produces": [
+                    "application/json",
+                    "text/xml",
+                    "application/yaml",
+                    "text/plain"
+                ],
+                "tags": [
+                    "pi"
+                ],
+                "summary": "Pi Value",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BigNumberResult"
+                        }
+                    }
+                }
+            }
+        },
         "/status": {
             "get": {
                 "description": "Get the status of the API",
@@ -401,9 +424,40 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tau": {
+            "get": {
+                "description": "Calculate Tau value up to 10K decimals",
+                "produces": [
+                    "application/json",
+                    "text/xml",
+                    "application/yaml",
+                    "text/plain"
+                ],
+                "tags": [
+                    "pi"
+                ],
+                "summary": "Tau Value",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BigNumberResult"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "api.BigNumberResult": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
+                }
+            }
+        },
         "api.DNSResolution": {
             "type": "object",
             "properties": {

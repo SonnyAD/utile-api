@@ -1,5 +1,10 @@
 basePath: /api
 definitions:
+  api.BigNumberResult:
+    properties:
+      result:
+        type: string
+    type: object
   api.DNSResolution:
     properties:
       resolution: {}
@@ -303,6 +308,22 @@ paths:
       summary: Get Recommended Links Page
       tags:
       - links
+  /pi:
+    get:
+      description: Calculate Pi value up to 10K decimals
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BigNumberResult'
+      summary: Pi Value
+      tags:
+      - pi
   /status:
     get:
       description: Get the status of the API
@@ -319,4 +340,20 @@ paths:
       summary: Healthcheck
       tags:
       - health
+  /tau:
+    get:
+      description: Calculate Tau value up to 10K decimals
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BigNumberResult'
+      summary: Tau Value
+      tags:
+      - pi
 swagger: "2.0"
