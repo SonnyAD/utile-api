@@ -26,4 +26,4 @@ jobs:
           go install gotest.tools/gotestsum
       - name: Tests
         run: | 
-          gotestsum
+          make test

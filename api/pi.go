@@ -15,38 +15,36 @@ https://en.wikipedia.org/wiki/Chudnovsky_algorithm#Python_code
 */
 const floatPrecision uint = 100000 // 100K
 
-type BigFloat big.Float
-
-func NewBigFloat(v float64) *big.Float {
+func newBigFloat(v float64) *big.Float {
 	return big.NewFloat(v).SetPrec(floatPrecision)
 }
 
 func binarySplit(a int, b int) (*big.Float, *big.Float, *big.Float) {
 	var Pab, Qab, Rab *big.Float
 
-	o := NewBigFloat(1)
+	o := newBigFloat(1)
 
-	A := NewBigFloat(float64(a))
+	A := newBigFloat(float64(a))
 
 	if b == a+1 {
-		i := NewBigFloat(10939058860032000)
-		j := NewBigFloat(545140134)
-		k := NewBigFloat(13591409)
-		e := NewBigFloat(0).Set(o.Add(o.Mul(big.NewFloat(6), A), big.NewFloat(-5)))
-		f := NewBigFloat(0).Set(o.Add(o.Mul(big.NewFloat(2), A), big.NewFloat(-1)))
-		g := NewBigFloat(0).Set(o.Add(o.Mul(big.NewFloat(6), A), big.NewFloat(-1)))
+		i := newBigFloat(10939058860032000)
+		j := newBigFloat(545140134)
+		k := newBigFloat(13591409)
+		e := newBigFloat(0).Set(o.Add(o.Mul(newBigFloat(6), A), newBigFloat(-5)))
+		f := newBigFloat(0).Set(o.Add(o.Mul(newBigFloat(2), A), newBigFloat(-1)))
+		g := newBigFloat(0).Set(o.Add(o.Mul(newBigFloat(6), A), newBigFloat(-1)))
 
-		Pab = NewBigFloat(1)
+		Pab = newBigFloat(1)
 		Pab = Pab.Mul(Pab, e)
 		Pab = Pab.Mul(Pab, f)
 		Pab = Pab.Mul(Pab, g)
-		Pab = Pab.Mul(Pab, big.NewFloat(-1))
+		Pab = Pab.Mul(Pab, newBigFloat(-1))
 
-		Qab = NewBigFloat(1)
+		Qab = newBigFloat(1)
 		Qab = Qab.Mul(Qab, i)
 		Qab = Qab.Mul(Qab, cube(A))
 
-		Rab = NewBigFloat(1)
+		Rab = newBigFloat(1)
 		Rab = Rab.Mul(Rab, Pab)
 
 		j.Mul(j, A)
@@ -57,10 +55,10 @@ func binarySplit(a int, b int) (*big.Float, *big.Float, *big.Float) {
 		Pam, Qam, Ram := binarySplit(a, m)
 		Pmb, Qmb, Rmb := binarySplit(m, b)
 
-		o1 := NewBigFloat(1)
-		o2 := NewBigFloat(1)
-		o3 := NewBigFloat(1)
-		o4 := NewBigFloat(1)
+		o1 := newBigFloat(1)
+		o2 := newBigFloat(1)
+		o3 := newBigFloat(1)
+		o4 := newBigFloat(1)
 
 		Pab = o1.Mul(Pam, Pmb)
 		Qab = o2.Mul(Qam, Qmb)
@@ -73,7 +71,7 @@ func binarySplit(a int, b int) (*big.Float, *big.Float, *big.Float) {
 }
 
 func cube(v *big.Float) *big.Float {
-	result := NewBigFloat(1)
+	result := newBigFloat(1)
 	result = result.Mul(result, v)
 	result = result.Mul(result, v)
 	result = result.Mul(result, v)
@@ -83,19 +81,19 @@ func cube(v *big.Float) *big.Float {
 // chudnovsky computes π using the Chudnovsky algorithm
 func chudnovsky(n int) *big.Float {
 	_, Q1n, R1n := binarySplit(1, n)
-	k := NewBigFloat(426880.0)
-	l := NewBigFloat(1).Sqrt(NewBigFloat(10005.0))
-	m := NewBigFloat(13591409.0)
+	k := newBigFloat(426880.0)
+	l := newBigFloat(1).Sqrt(newBigFloat(10005.0))
+	m := newBigFloat(13591409.0)
 
-	deno := NewBigFloat(1).Mul(NewBigFloat(1).Mul(k, l), Q1n)
-	divi := NewBigFloat(1).Add(NewBigFloat(1).Mul(m, Q1n), R1n)
+	deno := newBigFloat(1).Mul(newBigFloat(1).Mul(k, l), Q1n)
+	divi := newBigFloat(1).Add(newBigFloat(1).Mul(m, Q1n), R1n)
 
-	return NewBigFloat(1).Quo(deno, divi)
+	return newBigFloat(1).Quo(deno, divi)
 }
 
 func chudnovskyTau(n int) *big.Float {
 	pi := chudnovsky(n)
-	pi.Mul(pi, NewBigFloat(2.0))
+	pi.Mul(pi, newBigFloat(2.0))
 
 	return pi
 }
