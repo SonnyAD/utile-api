@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"gopkg.in/yaml.v2"
 )
@@ -18,25 +19,20 @@ func EnableCors(next http.Handler) http.Handler {
 }
 
 func Output(w http.ResponseWriter, accept []string, v interface{}, plain string) {
-	if contains(accept, "application/json") {
-		reply, _ := json.Marshal(v)
-		fmt.Fprint(w, string(reply))
-	} else if contains(accept, "application/xml") {
-		reply, _ := xml.Marshal(v)
-		fmt.Fprint(w, string(reply))
-	} else if contains(accept, "application/yaml") {
-		reply, _ := yaml.Marshal(v)
-		fmt.Fprint(w, string(reply))
-	} else {
-		fmt.Fprint(w, plain)
-	}
+	fmt.Fprint(w, computeOutput(accept, v, plain))
 }
 
-func contains(arr []string, str string) bool {
-	for _, a := range arr {
-		if a == str {
-			return true
-		}
+func computeOutput(accept []string, v interface{}, plain string) string {
+	if slices.Contains(accept, "application/json") {
+		reply, _ := json.Marshal(v)
+		return string(reply)
+	} else if slices.Contains(accept, "application/xml") {
+		reply, _ := xml.Marshal(v)
+		return string(reply)
+	} else if slices.Contains(accept, "application/yaml") {
+		reply, _ := yaml.Marshal(v)
+		return string(reply)
+	} else {
+		return plain
 	}
-	return false
 }
