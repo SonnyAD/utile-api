@@ -3,9 +3,15 @@ package api
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
+	"log"
 	"math/big"
 	"net/http"
+	"os"
+	"regexp"
+	"strconv"
 
+	"github.com/gorilla/websocket"
 	"utile.space/api/utils"
 )
 
@@ -98,7 +104,7 @@ func chudnovskyTau(n int) *big.Float {
 // @Tags			pi
 // @Produce		json,xml,application/yaml,plain
 // @Success		200	{object}	BigNumberResult
-// @Router			/pi [get]
+// @Router			/math/pi [get]
 func CalculatePi(w http.ResponseWriter, r *http.Request) {
 	pi := chudnovsky(10000)
 
@@ -114,7 +120,7 @@ func CalculatePi(w http.ResponseWriter, r *http.Request) {
 // @Tags			pi
 // @Produce		json,xml,application/yaml,plain
 // @Success		200	{object}	BigNumberResult
-// @Router			/tau [get]
+// @Router			/math/tau [get]
 func CalculateTau(w http.ResponseWriter, r *http.Request) {
 	tau := chudnovskyTau(10000)
 
@@ -129,4 +135,77 @@ type BigNumberResult struct {
 	XMLName xml.Name `json:"-" xml:"bignumber" yaml:"-"`
 	Name    string   `json:"name" xml:"name" yaml:"name"`
 	Value   string   `json:"value" xml:"value" yaml:"value"`
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return r.URL.Hostname() == "utile.space"
+	},
+}
+
+// @Summary		MathWebsocket to get pi and tau by page up to 1M digits
+// @Description	Websocket to get pi and tau by page up to 1M digits. It will switch protocols as requested.
+// @Tags			pi
+// @Success		101
+// @Router			/math/ws [get]
+func MathWebsocket(w http.ResponseWriter, r *http.Request) {
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Print("upgrade:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer c.Close()
+	for {
+		mt, message, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			continue
+		}
+		log.Printf("recv: %s", message)
+
+		r := regexp.MustCompile(`^(pi|tau)\s+([0-9]+),\s*([0-9]+)$`)
+		subMatch := r.FindStringSubmatch(string(message))
+
+		// pi or tau
+		if subMatch != nil {
+			page, err := strconv.Atoi(subMatch[2])
+			if err != nil {
+				log.Println("write:", err)
+				continue
+			}
+			pageSize, err := strconv.Atoi(subMatch[3])
+			if err != nil {
+				log.Println("write:", err)
+				continue
+			}
+
+			err = c.WriteMessage(mt, []byte(readNextPage(subMatch[1], page, pageSize)))
+			if err != nil {
+				log.Println("write:", err)
+				continue
+			}
+		}
+	}
+}
+
+func readNextPage(file string, page int, pageSize int) []byte {
+	f, err := os.Open("./assets/" + file)
+	if err != nil {
+		return nil
+	}
+
+	var buffer []byte = make([]byte, pageSize)
+
+	_, err = f.Seek(int64(page*len(buffer)), io.SeekStart)
+	if err != nil {
+		return nil
+	}
+
+	_, err = f.Read(buffer)
+	if err != nil {
+		return nil
+	}
+
+	return buffer
 }

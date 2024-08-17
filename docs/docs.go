@@ -379,7 +379,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/pi": {
+        "/math/pi": {
             "get": {
                 "description": "Calculate Pi value up to 10K decimals",
                 "produces": [
@@ -402,6 +402,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/math/tau": {
+            "get": {
+                "description": "Calculate Tau value up to 10K decimals",
+                "produces": [
+                    "application/json",
+                    "text/xml",
+                    "application/yaml",
+                    "text/plain"
+                ],
+                "tags": [
+                    "pi"
+                ],
+                "summary": "Tau Value",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BigNumberResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/math/ws": {
+            "get": {
+                "description": "Websocket to get pi and tau by page up to 1M digits. It will switch protocols as requested.",
+                "tags": [
+                    "pi"
+                ],
+                "summary": "Websocket to get pi and tau by page up to 1M digits",
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols"
+                    }
+                }
+            }
+        },
         "/status": {
             "get": {
                 "description": "Get the status of the API",
@@ -420,29 +457,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/main.Health"
-                        }
-                    }
-                }
-            }
-        },
-        "/tau": {
-            "get": {
-                "description": "Calculate Tau value up to 10K decimals",
-                "produces": [
-                    "application/json",
-                    "text/xml",
-                    "application/yaml",
-                    "text/plain"
-                ],
-                "tags": [
-                    "pi"
-                ],
-                "summary": "Tau Value",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BigNumberResult"
                         }
                     }
                 }

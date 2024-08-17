@@ -310,7 +310,7 @@ paths:
       summary: Get Recommended Links Page
       tags:
       - links
-  /pi:
+  /math/pi:
     get:
       description: Calculate Pi value up to 10K decimals
       produces:
@@ -324,6 +324,32 @@ paths:
           schema:
             $ref: '#/definitions/api.BigNumberResult'
       summary: Pi Value
+      tags:
+      - pi
+  /math/tau:
+    get:
+      description: Calculate Tau value up to 10K decimals
+      produces:
+      - application/json
+      - text/xml
+      - application/yaml
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BigNumberResult'
+      summary: Tau Value
+      tags:
+      - pi
+  /math/ws:
+    get:
+      description: Websocket to get pi and tau by page up to 1M digits. It will switch
+        protocols as requested.
+      responses:
+        "101":
+          description: Switching Protocols
+      summary: Websocket to get pi and tau by page up to 1M digits
       tags:
       - pi
   /status:
@@ -342,20 +368,4 @@ paths:
       summary: Healthcheck
       tags:
       - health
-  /tau:
-    get:
-      description: Calculate Tau value up to 10K decimals
-      produces:
-      - application/json
-      - text/xml
-      - application/yaml
-      - text/plain
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BigNumberResult'
-      summary: Tau Value
-      tags:
-      - pi
 swagger: "2.0"

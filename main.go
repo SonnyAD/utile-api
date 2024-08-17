@@ -74,8 +74,9 @@ func main() {
 	apiRouter.HandleFunc("/dns/dmarc/{domain}", api.DMARCResolve).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/dns/ptr/{ip}", api.PTRResolve).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/links", api.GetLinksPage).Methods(http.MethodGet)
-	apiRouter.HandleFunc("/pi", api.CalculatePi).Methods(http.MethodGet)
-	apiRouter.HandleFunc("/tau", api.CalculateTau).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/math/pi", api.CalculatePi).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/math/tau", api.CalculateTau).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/math/ws", api.MathWebsocket).Methods(http.MethodGet)
 
 	apiRouter.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
 

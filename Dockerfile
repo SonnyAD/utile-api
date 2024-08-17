@@ -11,6 +11,7 @@ FROM scratch AS runtime
 
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /app/server /
+COPY --from=build /app/assets /assets
 
 EXPOSE 3000/tcp
 CMD ["/server"]
