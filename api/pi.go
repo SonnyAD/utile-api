@@ -139,7 +139,7 @@ type BigNumberResult struct {
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return r.URL.Hostname() == "utile.space"
+		return true
 	},
 }
 
