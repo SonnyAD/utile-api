@@ -325,7 +325,7 @@ paths:
             $ref: '#/definitions/api.BigNumberResult'
       summary: Pi Value
       tags:
-      - pi
+      - math
   /math/tau:
     get:
       description: Calculate Tau value up to 10K decimals
@@ -341,7 +341,7 @@ paths:
             $ref: '#/definitions/api.BigNumberResult'
       summary: Tau Value
       tags:
-      - pi
+      - math
   /math/ws:
     get:
       description: Websocket to get pi and tau by page up to 1M digits. It will switch
@@ -349,9 +349,9 @@ paths:
       responses:
         "101":
           description: Switching Protocols
-      summary: Websocket to get pi and tau by page up to 1M digits
+      summary: MathWebsocket to get pi and tau by page up to 1M digits
       tags:
-      - pi
+      - math
   /status:
     get:
       description: Get the status of the API

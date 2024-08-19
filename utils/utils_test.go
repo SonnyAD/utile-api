@@ -7,7 +7,6 @@ import (
 )
 
 func Test_computeOutput(t *testing.T) {
-
 	tt := map[string]struct {
 		acceptHeader []string
 		reply        interface{}

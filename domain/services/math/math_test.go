@@ -1,9 +1,11 @@
-package api
+package math
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/big"
+	"os"
 	"strings"
 	"testing"
 
@@ -16,18 +18,28 @@ func Test_CalculatePi(t *testing.T) {
 		expected string
 	}{
 		"pi": {
-			value:    chudnovsky(10000),
+			value:    Chudnovsky(10000),
 			expected: fmt.Sprint(math.Pi),
 		},
 		"tau": {
-			value:    chudnovskyTau(10000),
+			value:    ChudnovskyTau(10000),
 			expected: fmt.Sprint(math.Pi * 2.0),
 		},
 	}
 
 	for name, tc := range tt {
 		t.Run(name, func(t *testing.T) {
-			strVal := fmt.Sprintf("%.10000f", tc.value)
+			strVal := fmt.Sprintf("%.1000000f", tc.value)
+
+			f, err := os.Create("/tmp/" + name)
+			assert.NoError(t, err)
+
+			defer f.Close()
+
+			w := bufio.NewWriter(f)
+			_, err = w.WriteString(strVal)
+			assert.NoError(t, err)
+
 			assert.True(t, strings.HasPrefix(strVal, tc.expected))
 		})
 	}
@@ -60,7 +72,7 @@ func Benchmark_CalculatePi(b *testing.B) {
 	for name, tc := range tt {
 		b.Run(name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				chudnovsky(tc.value)
+				Chudnovsky(tc.value)
 			}
 		})
 	}

@@ -389,7 +389,7 @@ const docTemplate = `{
                     "text/plain"
                 ],
                 "tags": [
-                    "pi"
+                    "math"
                 ],
                 "summary": "Pi Value",
                 "responses": {
@@ -412,7 +412,7 @@ const docTemplate = `{
                     "text/plain"
                 ],
                 "tags": [
-                    "pi"
+                    "math"
                 ],
                 "summary": "Tau Value",
                 "responses": {
@@ -429,9 +429,9 @@ const docTemplate = `{
             "get": {
                 "description": "Websocket to get pi and tau by page up to 1M digits. It will switch protocols as requested.",
                 "tags": [
-                    "pi"
+                    "math"
                 ],
-                "summary": "Websocket to get pi and tau by page up to 1M digits",
+                "summary": "MathWebsocket to get pi and tau by page up to 1M digits",
                 "responses": {
                     "101": {
                         "description": "Switching Protocols"
