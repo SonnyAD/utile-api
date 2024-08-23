@@ -77,6 +77,7 @@ func main() {
 	apiRouter.HandleFunc("/math/pi", api.CalculatePi).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/math/tau", api.CalculateTau).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/math/ws", api.MathWebsocket).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/battleships/ws", api.BattleshipsWebsocket).Methods(http.MethodGet)
 
 	apiRouter.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
 

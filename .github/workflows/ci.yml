@@ -38,4 +38,4 @@ jobs:
           go install gotest.tools/gotestsum@latest
       - name: Tests
         run: | 
-          make test        
+          make test
