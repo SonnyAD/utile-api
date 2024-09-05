@@ -12,7 +12,6 @@ import (
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-
 	"utile.space/api/domain/valueobjects"
 )
 
@@ -150,7 +149,10 @@ func (h *Hub) EndMatch(player string, reason string) {
 
 	h.mappingPlayerIDToClient[player].CurrentMatchID = ""
 
-	h.MessageOpponent(player, matchID, reason)
+	err := h.MessageOpponent(player, matchID, reason)
+	if err != nil {
+		log.Warnf("EndMatch error: %v", err)
+	}
 }
 
 func (h *Hub) PlayerCommit(matchID string, playerID string, commit string, index int) {
@@ -170,7 +172,11 @@ func (h *Hub) PlayerCommit(matchID string, playerID string, commit string, index
 func (h *Hub) QuickMatch(player2 string) (string, error) {
 	for matchID, match := range h.matches {
 		if match.IsPendingPlayer() {
-			match.Player2Join(player2)
+			err := match.Player2Join(player2)
+			if err != nil {
+				log.Warnf("QuickMatch error: %v", err)
+				continue
+			}
 			h.MessagePlayer("", match.players[0].playerID, "joined")
 			h.MessagePlayer("", match.players[1].playerID, "youjoined")
 			return matchID, nil

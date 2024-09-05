@@ -80,14 +80,17 @@ func (c *Client) ReadPump() {
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err != nil {
+		log.Warnf("ReadPump error: %v", err)
+	}
+	c.conn.SetPongHandler(func(string) error { err := c.conn.SetReadDeadline(time.Now().Add(pongWait)); return err })
 
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				log.Warnf("ReadPump error: %v", err)
 			}
 			break
 		}
@@ -95,8 +98,7 @@ func (c *Client) ReadPump() {
 
 		err = c.EvaluateRPC(string(message))
 		if err != nil {
-			log.Debug("write:", err)
-			continue
+			log.Debugf("ReadPump read error: %v", err)
 		}
 	}
 }
@@ -115,10 +117,14 @@ func (c *Client) WritePump() {
 	for {
 		select {
 		case message, ok := <-c.Send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				log.Warnf("WritePump error: %v", err)
+			}
 			if !ok {
 				// The hub closed the channel.
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				err = c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				log.Warnf("WritePump channel closed error: %v", err)
 				return
 			}
 
@@ -126,20 +132,35 @@ func (c *Client) WritePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
+
+			n, err := w.Write(message)
+			if n != len(message) {
+				log.Warn("Different length written and expected in the websocket")
+			}
+			if err != nil {
+				log.Warnf("WritePump error: %v", err)
+			}
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.Send)
+			n = len(c.Send)
 			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.Send)
+				if _, err = w.Write(newline); err != nil {
+					log.Warnf("WritePump error: %v", err)
+				}
+
+				if _, err = w.Write(<-c.Send); err != nil {
+					log.Warnf("WritePump error: %v", err)
+				}
 			}
 
 			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				log.Warnf("WritePump error: %v", err)
+			}
+
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
