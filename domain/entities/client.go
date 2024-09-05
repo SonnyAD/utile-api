@@ -2,13 +2,10 @@ package entities
 
 import (
 	"bytes"
-	"log"
-	"regexp"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -30,11 +27,6 @@ var (
 	space   = []byte{' '}
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 var lastClientId = 0
 
 // Client is a middleman between the websocket connection and the hub.
@@ -45,7 +37,7 @@ type Client struct {
 	conn *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	Send chan []byte
 
 	id int
 
@@ -59,7 +51,7 @@ func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 	return &Client{
 		Hub:  hub,
 		conn: conn,
-		send: make(chan []byte, 256),
+		Send: make(chan []byte, 256),
 		id:   lastClientId,
 	}
 }
@@ -101,60 +93,10 @@ func (c *Client) ReadPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		r := regexp.MustCompile(`^(signin|startgame|join|shoot|giveup|commit|emoji|miss|hit|prove|proof|lose)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?$`)
-		subMatch := r.FindStringSubmatch(string(message))
-
-		ack := []byte("ack")
-		nack := []byte("nack")
-		/*hit := []byte("hit")
-		miss := []byte("miss")*/
-
-		if subMatch != nil {
-			if subMatch[1] == "signin" {
-				c.SetPlayerID(subMatch[3])
-				c.Hub.mappingPlayerIDToClient[c.PlayerID] = c
-				c.send <- ack
-			} else if subMatch[1] == "startgame" {
-				matchID := c.Hub.NewMatch(c.PlayerID)
-				c.CurrentMatchID = matchID
-				c.send <- ack
-			} else if subMatch[1] == "join" {
-				matchID, err := c.Hub.QuickMatch(c.PlayerID)
-				if err == nil {
-					c.CurrentMatchID = matchID
-					c.send <- ack
-				} else {
-					c.send <- nack
-				}
-			} else if subMatch[1] == "commit" {
-				index, _ := strconv.Atoi(strings.Split(subMatch[5], ",")[0])
-				c.send <- ack
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, string(message))
-				c.Hub.PlayerCommit(c.CurrentMatchID, c.PlayerID, subMatch[3], index)
-			} else if subMatch[1] == "shoot" {
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, "shot "+subMatch[5])
-			} else if subMatch[1] == "emoji" {
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, "receive "+subMatch[7])
-			} else if subMatch[1] == "giveup" {
-				c.Hub.EndMatch(c.PlayerID, "gaveup")
-			} else if subMatch[1] == "lose" {
-				c.Hub.EndMatch(c.PlayerID, "lose")
-			} else if subMatch[1] == "hit" {
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, string(message))
-				c.send <- []byte("turn")
-			} else if subMatch[1] == "miss" {
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, string(message))
-				c.send <- []byte("turn")
-			} else if subMatch[1] == "prove" {
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, string(message))
-			} else if subMatch[1] == "proof" {
-				c.Hub.MessageOpponent(c.PlayerID, c.CurrentMatchID, string(message))
-			}
-
-			if err != nil {
-				log.Println("write:", err)
-				continue
-			}
+		err = c.EvaluateRPC(string(message))
+		if err != nil {
+			log.Debug("write:", err)
+			continue
 		}
 	}
 }
@@ -172,7 +114,7 @@ func (c *Client) WritePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
+		case message, ok := <-c.Send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -187,10 +129,10 @@ func (c *Client) WritePump() {
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
+			n := len(c.Send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write(<-c.send)
+				w.Write(<-c.Send)
 			}
 
 			if err := w.Close(); err != nil {

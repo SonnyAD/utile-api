@@ -40,6 +40,19 @@ definitions:
       next:
         type: string
     type: object
+  api.StatsResult:
+    properties:
+      finishedMatches:
+        type: integer
+      ongoingMatches:
+        type: integer
+      onlinePlayers:
+        type: integer
+      pendingMatches:
+        type: integer
+      totalMatches:
+        type: integer
+    type: object
   api.Tag:
     properties:
       color:
@@ -326,6 +339,17 @@ paths:
       summary: Pi Value
       tags:
       - math
+  /math/stats:
+    get:
+      description: To get stats on multiplayer state of the battleships game
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.StatsResult'
+      summary: BattleshipsStats to get stats on the multiplayer state of the game
+      tags:
+      - battleships
   /math/tau:
     get:
       description: Calculate Tau value up to 10K decimals

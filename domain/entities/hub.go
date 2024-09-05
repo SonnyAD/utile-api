@@ -5,11 +5,13 @@
 package entities
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 
 	"utile.space/api/domain/valueobjects"
 )
@@ -41,6 +43,48 @@ func NewHub() *Hub {
 		mappingPlayerIDToClient: make(map[string]*Client),
 		matches:                 make(map[string]*Match),
 	}
+}
+
+func (h *Hub) CountOnlinePlayers() int {
+	return len(h.clients)
+}
+
+func (h *Hub) CountTotalMatches() int {
+	return len(h.matches)
+}
+
+func (h *Hub) CountPendingMatches() int {
+	var count = 0
+	for _, match := range h.matches {
+		if match.IsPendingPlayer() {
+			count = count + 1
+		}
+	}
+	return count
+}
+
+func (h *Hub) CountOngoingMatches() int {
+	var count = 0
+	for _, match := range h.matches {
+		if !match.IsPendingPlayer() && !match.matchOver {
+			count = count + 1
+		}
+	}
+	return count
+}
+
+func (h *Hub) CountFinishedMatches() int {
+	var count = 0
+	for _, match := range h.matches {
+		if match.matchOver {
+			count = count + 1
+		}
+	}
+	return count
+}
+
+func (h *Hub) RecordPlayerIDClientMapping(playerId string, client *Client) {
+	h.mappingPlayerIDToClient[playerId] = client
 }
 
 func (h *Hub) NewMatch(player1 string) string {
@@ -138,33 +182,38 @@ func (h *Hub) QuickMatch(player2 string) (string, error) {
 	return "", errors.New("no match found")
 }
 
-func (h *Hub) Run() {
+func (h *Hub) Run(ctx context.Context) {
 	for {
 		select {
 		case client := <-h.Register:
 			h.clients[client] = true
+			log.WithFields(log.Fields{
+				"onlinePlayerCount": len(h.clients),
+			}).Debug("New player connected")
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				delete(h.mappingPlayerIDToClient, client.PlayerID)
-				close(client.send)
+				close(client.Send)
 			}
 		case message := <-h.messages:
 			if message.IsBroadcastMessage() {
 				for client := range h.clients {
 					select {
-					case client.send <- message.Content():
+					case client.Send <- message.Content():
 					default:
 						delete(h.clients, client)
 						delete(h.mappingPlayerIDToClient, client.PlayerID)
-						close(client.send)
+						close(client.Send)
 					}
 				}
 			} else {
 				if client, ok := h.mappingPlayerIDToClient[message.Recipient()]; ok {
-					client.send <- message.Content()
+					client.Send <- message.Content()
 				}
 			}
+		case <-ctx.Done():
+			return
 		}
 	}
 }

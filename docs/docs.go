@@ -402,6 +402,23 @@ const docTemplate = `{
                 }
             }
         },
+        "/math/stats": {
+            "get": {
+                "description": "To get stats on multiplayer state of the battleships game",
+                "tags": [
+                    "battleships"
+                ],
+                "summary": "BattleshipsStats to get stats on the multiplayer state of the game",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.StatsResult"
+                        }
+                    }
+                }
+            }
+        },
         "/math/tau": {
             "get": {
                 "description": "Calculate Tau value up to 10K decimals",
@@ -523,6 +540,26 @@ const docTemplate = `{
                 },
                 "next": {
                     "type": "string"
+                }
+            }
+        },
+        "api.StatsResult": {
+            "type": "object",
+            "properties": {
+                "finishedMatches": {
+                    "type": "integer"
+                },
+                "ongoingMatches": {
+                    "type": "integer"
+                },
+                "onlinePlayers": {
+                    "type": "integer"
+                },
+                "pendingMatches": {
+                    "type": "integer"
+                },
+                "totalMatches": {
+                    "type": "integer"
                 }
             }
         },

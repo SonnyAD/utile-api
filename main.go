@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/xml"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"utile.space/api/api"
 	_ "utile.space/api/docs"
@@ -41,6 +41,11 @@ type Health struct {
 	Status  string   `json:"status" xml:"status" yaml:"status"`
 }
 
+func initLogging() {
+	log.SetLevel(log.DebugLevel)
+	//log.SetFormatter(&log.JSONFormatter{})
+}
+
 // @title			utile.space Open API
 // @version		1.0
 // @description	The collection of free API from utile.space, the Swiss Army Knife webtool.
@@ -53,6 +58,8 @@ type Health struct {
 //
 // @BasePath		/api
 func main() {
+	initLogging()
+
 	router := mux.NewRouter()
 
 	router.Use(utils.EnableCors)
@@ -78,6 +85,7 @@ func main() {
 	apiRouter.HandleFunc("/math/tau", api.CalculateTau).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/math/ws", api.MathWebsocket).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/battleships/ws", api.BattleshipsWebsocket).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/battleships/stats", api.BattleshipsStats).Methods(http.MethodGet)
 
 	apiRouter.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
 
