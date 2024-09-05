@@ -189,6 +189,7 @@ func (h *Hub) QuickMatch(player2 string) (string, error) {
 }
 
 func (h *Hub) Run(ctx context.Context) {
+	log.Debug("Hub runner starting...")
 	for {
 		select {
 		case client := <-h.Register:
@@ -219,6 +220,7 @@ func (h *Hub) Run(ctx context.Context) {
 				}
 			}
 		case <-ctx.Done():
+			log.Info("Hub runner terminated...")
 			return
 		}
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	battleships "utile.space/api/domain/entities"
@@ -51,11 +51,21 @@ func BattleshipsWebsocket(w http.ResponseWriter, r *http.Request) {
 	client := battleships.NewClient(hub, c)
 	client.Hub.Register <- client
 
-	go client.WritePump()
-	go client.ReadPump()
-	for {
-		time.Sleep(time.Second)
-	}
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go func() {
+		client.WritePump()
+		wg.Done()
+	}()
+
+	go func() {
+		client.ReadPump()
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
 
 // @Summary		BattleshipsStats to get stats on the multiplayer state of the game

@@ -100,5 +100,6 @@ func main() {
 		port = "3000"
 	}
 
+	log.Info("Starting server on port ", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
