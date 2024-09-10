@@ -42,8 +42,6 @@ type Client struct {
 	id int
 
 	PlayerID string
-
-	CurrentMatchID string
 }
 
 func NewClient(hub *Hub, conn *websocket.Conn) *Client {
@@ -58,14 +56,6 @@ func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 
 func (c *Client) SetPlayerID(playerID string) {
 	c.PlayerID = playerID
-}
-
-func (c *Client) SetPlayerInMatchID(matchID string) {
-	c.CurrentMatchID = matchID
-}
-
-func (c *Client) IsInMatch() bool {
-	return c.CurrentMatchID != ""
 }
 
 // ReadPump pumps messages from the websocket connection to the hub.
