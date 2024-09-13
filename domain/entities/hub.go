@@ -18,7 +18,10 @@ import (
 // Hub maintains the set of active clients/matches and broadcasts messages to the clients.
 type Hub struct {
 	// Registered clients.
+	// TODO: change bool to timestamp to compute an expiration after
 	clients map[*Client]bool
+
+	players map[string]*Player
 
 	mappingPlayerIDToClient map[string]*Client
 
@@ -39,13 +42,14 @@ func NewHub() *Hub {
 		Register:                make(chan *Client),
 		unregister:              make(chan *Client),
 		clients:                 make(map[*Client]bool),
+		players:                 make(map[string]*Player),
 		mappingPlayerIDToClient: make(map[string]*Client),
 		matches:                 make(map[string]*Match),
 	}
 }
 
 func (h *Hub) CountOnlinePlayers() int {
-	return len(h.clients)
+	return len(h.players)
 }
 
 func (h *Hub) CountTotalMatches() int {
@@ -82,7 +86,11 @@ func (h *Hub) CountFinishedMatches() int {
 	return count
 }
 
-func (h *Hub) RecordPlayerIDClientMapping(playerId string, client *Client) {
+func (h *Hub) RecordPlayer(playerId string, client *Client) {
+	if _, ok := h.players[playerId]; !ok {
+		h.players[playerId] = NewPlayer(playerId)
+	}
+
 	h.mappingPlayerIDToClient[playerId] = client
 }
 
@@ -141,17 +149,22 @@ func (h *Hub) MessageOpponent(playerID string, matchID string, message string) e
 }
 
 func (h *Hub) EndMatch(player string, reason string) {
-	matchID := h.mappingPlayerIDToClient[player].CurrentMatchID
-	h.matches[matchID].matchOver = true
+	matchID := h.players[player].CurrentMatchID
 
-	// The first player who gives up lose
-	h.matches[matchID].player1Turn = (player == h.matches[matchID].players[0].playerID)
+	if match, ok := h.matches[matchID]; ok {
+		match.matchOver = true
 
-	h.mappingPlayerIDToClient[player].CurrentMatchID = ""
+		// The first player who gives up lose
+		match.player1Turn = (player == h.matches[matchID].players[0].playerID)
 
-	err := h.MessageOpponent(player, matchID, reason)
-	if err != nil {
-		log.Warnf("EndMatch error: %v", err)
+		h.players[player].CurrentMatchID = ""
+
+		err := h.MessageOpponent(player, matchID, reason)
+		if err != nil {
+			log.Warnf("EndMatch error: %v", err)
+		}
+	} else {
+		log.Warnf("EndMatch warning: match not found")
 	}
 }
 
@@ -195,7 +208,7 @@ func (h *Hub) Run(ctx context.Context) {
 		case client := <-h.Register:
 			h.clients[client] = true
 			log.WithFields(log.Fields{
-				"onlinePlayerCount": len(h.clients),
+				"connectionsOpened": len(h.clients),
 			}).Debug("New player connected")
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
