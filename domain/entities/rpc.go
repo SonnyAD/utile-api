@@ -16,6 +16,7 @@ var (
 var (
 	ErrCommandNotRecognized = errors.New("command not recognized")
 	ErrCannotReachOpponent  = errors.New("cannot reach opponent")
+	ErrCannotParseCoords    = errors.New("cannot parse coords")
 	ErrUnexpected           = errors.New("unexpected error")
 )
 
@@ -30,14 +31,24 @@ func (c *Client) EvaluateRPC(command string) error {
 
 	switch {
 	case subMatch[1] == "commit":
-		index, err := strconv.Atoi(strings.Split(subMatch[5], ",")[0])
-		if err != nil {
-			return errors.Join(ErrUnexpected, err)
+		spt := strings.Split(subMatch[5], ",")
+		if len(spt) != 2 {
+			return ErrCannotParseCoords
 		}
+		x, err := strconv.Atoi(spt[0])
+		if err != nil {
+			return errors.Join(ErrCannotParseCoords, err)
+		}
+		y, err := strconv.Atoi(spt[1])
+		if err != nil {
+			return errors.Join(ErrCannotParseCoords, err)
+		}
+		index := (x - 1) + (y-1)*10
+
 		err = hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, command)
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 		hub.PlayerCommit(hub.players[c.PlayerID].CurrentMatchID, c.PlayerID, subMatch[3], index)
 		c.Send <- valueobjects.RPC_ACK.Export()
@@ -45,7 +56,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		err := hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, "receive "+subMatch[7])
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 	case subMatch[1] == "giveup":
 		hub.EndMatch(c.PlayerID, "gaveup")
@@ -53,7 +64,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		err := hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, command)
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 		c.Send <- []byte("turn")
 	case subMatch[1] == "join":
@@ -69,26 +80,26 @@ func (c *Client) EvaluateRPC(command string) error {
 		err := hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, command)
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 		c.Send <- []byte("turn")
 	case subMatch[1] == "proof":
 		err := hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, command)
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 	case subMatch[1] == "prove":
 		err := hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, command)
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 	case subMatch[1] == "shoot":
 		err := hub.MessageOpponent(c.PlayerID, hub.players[c.PlayerID].CurrentMatchID, "shot "+subMatch[5])
 		if err != nil {
 			c.Send <- valueobjects.RPC_NACK.Export()
-			return ErrCannotReachOpponent
+			return errors.Join(ErrCannotReachOpponent, err)
 		}
 	case subMatch[1] == "signin":
 		c.SetPlayerID(subMatch[3])

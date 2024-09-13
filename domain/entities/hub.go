@@ -208,7 +208,7 @@ func (h *Hub) Run(ctx context.Context) {
 		case client := <-h.Register:
 			h.clients[client] = true
 			log.WithFields(log.Fields{
-				"onlinePlayerCount": len(h.clients),
+				"connectionsOpened": len(h.clients),
 			}).Debug("New player connected")
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {

@@ -64,6 +64,9 @@ func (m *Match) Player2Join(player2 string) error {
 	if !m.IsPendingPlayer() {
 		return errors.New("cannot reassign a player")
 	}
+	if m.players[0].playerID == player2 {
+		return errors.New("cannot play against yourself")
+	}
 	m.players[1] = NewMatchedPlayer(player2)
 	return nil
 }
