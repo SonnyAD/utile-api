@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,26 +14,32 @@ func Test_CountOnlinePlayers(t *testing.T) {
 
 	client := NewClient(nil, nil)
 	client2 := NewClient(nil, nil)
+	uuid1 := uuid.NewString()
+	uuid2 := uuid.NewString()
 
 	tt := map[string]struct {
-		givenClients  []*Client
-		expectedCount int
+		givenClients   []*Client
+		givenPlayerIDs []string
+		expectedCount  int
 	}{
 		"none": {
 			givenClients:  make([]*Client, 0),
 			expectedCount: 0,
 		},
 		"one": {
-			givenClients:  []*Client{client},
-			expectedCount: 1,
+			givenClients:   []*Client{client},
+			givenPlayerIDs: []string{uuid1},
+			expectedCount:  1,
 		},
 		"one-too": {
-			givenClients:  []*Client{client, client},
-			expectedCount: 1,
+			givenClients:   []*Client{client, client},
+			givenPlayerIDs: []string{uuid1, uuid1},
+			expectedCount:  1,
 		},
 		"two": {
-			givenClients:  []*Client{client, client2},
-			expectedCount: 2,
+			givenClients:   []*Client{client, client2},
+			givenPlayerIDs: []string{uuid1, uuid2},
+			expectedCount:  2,
 		},
 	}
 
@@ -44,9 +51,11 @@ func Test_CountOnlinePlayers(t *testing.T) {
 			hub := NewHub()
 			go hub.Run(ctx)
 
-			for _, client := range tc.givenClients {
+			for i, client := range tc.givenClients {
 				hub.Register <- client
 				time.Sleep(10 * time.Millisecond)
+				client.SetPlayerID(tc.givenPlayerIDs[i])
+				hub.RecordPlayer(client.PlayerID, client)
 			}
 
 			assert.Equal(t, tc.expectedCount, hub.CountOnlinePlayers())
