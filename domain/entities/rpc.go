@@ -1,11 +1,14 @@
 package entities
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
+	"utile.space/api/domain/services/battleships"
 	"utile.space/api/domain/valueobjects"
 )
 
@@ -109,6 +112,19 @@ func (c *Client) EvaluateRPC(command string) error {
 		matchID := hub.NewMatch(c.PlayerID)
 		hub.players[c.PlayerID].CurrentMatchID = matchID
 		c.Send <- valueobjects.RPC_ACK.Export()
+		go func() {
+			time.Sleep(30 * time.Second)
+			if !hub.matches[matchID].IsPendingPlayer() {
+				return
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 24*time.Hour)
+			defer cancel()
+
+			attacksChannel := make(chan battleships.Point)
+			ai, turnChannel, shotsChannel := battleships.NewAI(attacksChannel)
+			ai.Start(ctx)
+		}()
 	default:
 		return ErrCommandNotRecognized
 	}
