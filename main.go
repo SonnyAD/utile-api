@@ -86,6 +86,7 @@ func main() {
 	apiRouter.HandleFunc("/math/ws", api.MathWebsocket).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/battleships/ws", api.BattleshipsWebsocket).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/battleships/stats", api.BattleshipsStats).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/spectrum/ws", api.SpectrumWebsocket).Methods(http.MethodGet)
 
 	apiRouter.HandleFunc("/status", HealthCheck).Methods(http.MethodGet)
 

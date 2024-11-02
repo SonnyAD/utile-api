@@ -112,6 +112,10 @@ func (h *Hub) JoinMatch(matchID string, player2 string) {
 	h.MessagePlayer(h.matches[matchID].players[1].playerID, matchID, "youjoined")
 }
 
+func (h *Hub) Broadcast(senderID string, content string) {
+	h.messages <- valueobjects.NewBroadcastMessage(senderID, []byte(content))
+}
+
 func (h *Hub) MessagePlayer(senderID string, recipentID string, content string) {
 	h.messages <- valueobjects.NewMessage(senderID, recipentID, []byte(content))
 }
