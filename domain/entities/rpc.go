@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|startgame|update)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?$`)
+	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|startgame|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -110,6 +110,8 @@ func (c *Client) EvaluateRPC(command string) error {
 		hub.players[c.PlayerID].CurrentMatchID = matchID
 		c.Send <- valueobjects.RPC_ACK.Export()
 	case subMatch[1] == "update":
+		hub.Broadcast(c.PlayerID, command)
+	case subMatch[1] == "claim":
 		hub.Broadcast(c.PlayerID, command)
 	default:
 		return ErrCommandNotRecognized
