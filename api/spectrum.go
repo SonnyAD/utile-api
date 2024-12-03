@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 	spectrum "utile.space/api/domain/entities"
 )
 
