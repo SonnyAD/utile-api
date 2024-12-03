@@ -2,9 +2,10 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
 	spectrum "utile.space/api/domain/entities"
@@ -38,7 +39,7 @@ var upgraderSpectrum = websocket.Upgrader{
 func SpectrumWebsocket(w http.ResponseWriter, r *http.Request) {
 	c, err := upgraderSpectrum.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Print("upgrade:", err)
+		log.Error("upgrade:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -47,6 +48,8 @@ func SpectrumWebsocket(w http.ResponseWriter, r *http.Request) {
 	hub := getSpectrumHub(context.Background())
 	client := spectrum.NewClient(hub, c)
 	client.Hub.Register <- client
+
+	log.Debug("New user connected")
 
 	var wg sync.WaitGroup
 

@@ -6,11 +6,13 @@ import (
 	"strconv"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"utile.space/api/domain/valueobjects"
 )
 
 var (
-	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|startgame|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
+	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|nickname|startgame|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -26,6 +28,8 @@ func (c *Client) EvaluateRPC(command string) error {
 	if subMatch == nil {
 		return errors.Join(ErrCommandNotRecognized, errors.New(command))
 	}
+
+	log.Debug("RPC " + subMatch[0])
 
 	hub := c.Hub
 
@@ -104,6 +108,8 @@ func (c *Client) EvaluateRPC(command string) error {
 	case subMatch[1] == "signin":
 		c.SetPlayerID(subMatch[3])
 		hub.RecordPlayer(c.PlayerID, c)
+		c.Send <- valueobjects.RPC_ACK.Export()
+	case subMatch[1] == "nickname":
 		c.Send <- valueobjects.RPC_ACK.Export()
 	case subMatch[1] == "startgame":
 		matchID := hub.NewMatch(c.PlayerID)
