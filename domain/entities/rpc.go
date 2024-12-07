@@ -110,6 +110,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		c.Send <- valueobjects.RPC_ACK.Export()
 	case subMatch[1] == "nickname":
 		c.Send <- valueobjects.RPC_ACK.Export()
+		hub.players[c.PlayerID].SetNickname(subMatch[9])
 	case subMatch[1] == "startgame":
 		matchID := hub.NewMatch(c.PlayerID)
 		hub.players[c.PlayerID].CurrentMatchID = matchID
