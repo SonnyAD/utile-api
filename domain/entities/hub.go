@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -101,6 +102,52 @@ func (h *Hub) NewMatch(player1 string) string {
 	h.matches[matchID] = match
 
 	return matchID
+}
+
+// from ChatGPT
+func generateRandomPassword() string {
+	// Allowed characters
+	allowedChars := "abcdefghijklmnopqrstuvwxyz0123456789"
+
+	lengthPassword := 4
+	randString := make([]byte, lengthPassword)
+
+	for i := 0; i < lengthPassword; i++ {
+		// Choose a random character from the allowedChars
+		randString[i] = allowedChars[rand.Intn(len(allowedChars))]
+	}
+
+	return "OSR-" + string(randString)
+}
+
+func (h *Hub) NewPrivateMatch(player1 string) (string, string) {
+	matchID := uuid.NewString()
+	password := generateRandomPassword()
+
+	match := NewPrivatePendingMatch(player1, password)
+
+	h.matches[matchID] = match
+
+	return matchID, password
+}
+
+func (h *Hub) JoinPrivateMatch(player string, password string) (string, error) {
+	found := false
+	var matchIDFound string
+	for matchID, match := range h.matches {
+		if match.password == password {
+			match.players = append(match.players, NewMatchedPlayer(player))
+			matchIDFound = matchID
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return "", errors.New("match not found")
+	}
+
+	return matchIDFound, nil
 }
 
 func (h *Hub) JoinMatch(matchID string, player2 string) {

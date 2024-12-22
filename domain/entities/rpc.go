@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|nickname|startgame|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
+	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|nickname|startgame|startspectrum|joinspectrum|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -115,10 +115,28 @@ func (c *Client) EvaluateRPC(command string) error {
 		matchID := hub.NewMatch(c.PlayerID)
 		hub.players[c.PlayerID].CurrentMatchID = matchID
 		c.Send <- valueobjects.RPC_ACK.Export()
+	case subMatch[1] == "startspectrum":
+		matchID, password := hub.NewPrivateMatch(c.PlayerID)
+		hub.players[c.PlayerID].CurrentMatchID = matchID
+		c.Send <- []byte("spectrum " + matchID + " " + password)
+	case subMatch[1] == "joinspectrum":
+		spt := strings.Split(subMatch[9], " ")
+		hub.players[c.PlayerID].SetNickname(spt[1])
+		matchID, err := hub.JoinPrivateMatch(c.PlayerID, spt[0])
+		if err != nil {
+			// Nothing
+		} else {
+			hub.players[c.PlayerID].CurrentMatchID = matchID
+			c.Send <- []byte("spectrum " + matchID + " " + subMatch[9])
+		}
 	case subMatch[1] == "update":
-		hub.Broadcast(c.PlayerID, command)
+		if hub.players[c.PlayerID].CurrentMatchID != "" {
+			hub.MessagePlayersInMatch(hub.players[c.PlayerID].CurrentMatchID, command)
+		}
 	case subMatch[1] == "claim":
-		hub.Broadcast(c.PlayerID, command)
+		if hub.players[c.PlayerID].CurrentMatchID != "" {
+			hub.MessagePlayersInMatch(hub.players[c.PlayerID].CurrentMatchID, command)
+		}
 	default:
 		return ErrCommandNotRecognized
 	}

@@ -32,6 +32,7 @@ func (mp *MatchedPlayer) IsPlayerReady() bool {
 
 type Match struct {
 	players     []*MatchedPlayer
+	password    string
 	matchOver   bool
 	player1Turn bool
 	turn        int
@@ -79,6 +80,13 @@ func NewPendingMatch(player1ID string) *Match {
 		player1Turn: rand.Intn(2) == 1, // randomly decide on whose turn
 		turn:        1,
 	}
+}
+
+func NewPrivatePendingMatch(player1ID string, password string) *Match {
+	match := NewPendingMatch(player1ID)
+	match.password = password
+
+	return match
 }
 
 func NewMatch(player1ID string, player2ID string) *Match {
