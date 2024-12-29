@@ -169,7 +169,10 @@ func (h *Hub) MessagePlayer(senderID string, recipentID string, content string) 
 
 func (h *Hub) MessagePlayersInMatch(matchID string, content string) {
 	for _, player := range h.matches[matchID].players {
-		h.messages <- valueobjects.NewServiceMessage(player.playerID, []byte(content))
+		// TODO: fix why we can have nil player here
+		if player != nil {
+			h.messages <- valueobjects.NewServiceMessage(player.playerID, []byte(content))
+		}
 	}
 }
 
@@ -263,6 +266,9 @@ func (h *Hub) Run(ctx context.Context) {
 			}).Debug("New player connected")
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
+				log.WithFields(log.Fields{
+					"player": client.PlayerID,
+				}).Debug("Unregistering client")
 				delete(h.clients, client)
 				delete(h.mappingPlayerIDToClient, client.PlayerID)
 				close(client.Send)

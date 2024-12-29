@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|nickname|startgame|startspectrum|joinspectrum|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
+	r = regexp.MustCompile(`^(commit|emoji|giveup|hit|join|lose|miss|proof|prove|shoot|signin|nickname|startgame|startspectrum|joinspectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -132,6 +132,17 @@ func (c *Client) EvaluateRPC(command string) error {
 	case subMatch[1] == "update":
 		if hub.players[c.PlayerID].CurrentMatchID != "" {
 			hub.MessagePlayersInMatch(hub.players[c.PlayerID].CurrentMatchID, command)
+		}
+	case subMatch[1] == "resetpositions":
+		if hub.players[c.PlayerID].CurrentMatchID != "" {
+			newPositions := []string{"323,331", "292,358", "278,329", "351,337", "367,365", "393,339"}
+			match := hub.matches[hub.players[c.PlayerID].CurrentMatchID]
+			for i, player := range match.players {
+				if i == 0 || player == nil {
+					continue
+				}
+				hub.MessagePlayer(c.PlayerID, player.playerID, "newposition "+newPositions[i])
+			}
 		}
 	case subMatch[1] == "claim":
 		if hub.players[c.PlayerID].CurrentMatchID != "" {
