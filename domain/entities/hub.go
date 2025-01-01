@@ -107,7 +107,7 @@ func (h *Hub) NewMatch(player1 string) string {
 // from ChatGPT
 func generateRandomPassword() string {
 	// Allowed characters
-	allowedChars := "abcdefghijklmnopqrstuvwxyz0123456789"
+	allowedChars := "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"
 
 	lengthPassword := 4
 	randString := make([]byte, lengthPassword)
