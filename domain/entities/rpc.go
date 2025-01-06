@@ -135,7 +135,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		}
 	case subMatch[1] == "resetpositions":
 		if hub.players[c.PlayerID].CurrentMatchID != "" {
-			newPositions := []string{"323,331", "292,358", "278,329", "351,337", "367,365", "393,339"}
+			newPositions := []string{"405,383", "376,413", "322,421", "323,381", "279,389", "360,381"}
 			match := hub.matches[hub.players[c.PlayerID].CurrentMatchID]
 			for i, player := range match.players {
 				if i == 0 || player == nil {
