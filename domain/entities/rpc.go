@@ -141,7 +141,7 @@ func (c *Client) EvaluateRPC(command string) error {
 				if i == 0 || player == nil {
 					continue
 				}
-				hub.MessagePlayer(c.PlayerID, player.playerID, "newposition "+newPositions[i])
+				hub.MessagePlayer(c.PlayerID, player.playerID, "newposition "+newPositions[i%len(newPositions)])
 			}
 		}
 	case subMatch[1] == "claim":
