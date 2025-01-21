@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"slices"
 
@@ -35,4 +36,19 @@ func computeOutput(accept []string, v interface{}, plain string) string {
 	} else {
 		return plain
 	}
+}
+
+// from ChatGPT
+func GenerateRandomString(length int) string {
+	// Allowed characters
+	allowedChars := "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"
+
+	randString := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		// Choose a random character from the allowedChars
+		randString[i] = allowedChars[rand.Intn(len(allowedChars))]
+	}
+
+	return "OSR-" + string(randString)
 }

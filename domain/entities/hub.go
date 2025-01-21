@@ -8,12 +8,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"utile.space/api/domain/valueobjects"
+	"utile.space/api/utils"
 )
 
 // Hub maintains the set of active clients/matches and broadcasts messages to the clients.
@@ -104,25 +104,9 @@ func (h *Hub) NewMatch(player1 string) string {
 	return matchID
 }
 
-// from ChatGPT
-func generateRandomPassword() string {
-	// Allowed characters
-	allowedChars := "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"
-
-	lengthPassword := 4
-	randString := make([]byte, lengthPassword)
-
-	for i := 0; i < lengthPassword; i++ {
-		// Choose a random character from the allowedChars
-		randString[i] = allowedChars[rand.Intn(len(allowedChars))]
-	}
-
-	return "OSR-" + string(randString)
-}
-
 func (h *Hub) NewPrivateMatch(player1 string) (string, string) {
 	matchID := uuid.NewString()
-	password := generateRandomPassword()
+	password := utils.GenerateRandomString(4)
 
 	match := NewPrivatePendingMatch(player1, password)
 
