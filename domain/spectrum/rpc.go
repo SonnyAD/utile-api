@@ -40,13 +40,13 @@ func (c *Client) EvaluateRPC(command string) error {
 		c.send <- valueobjects.RPC_ACK.Export()
 		c.hub.users[c.UserID()].SetNickname(subMatch[9])
 	case subMatch[1] == "startspectrum":
-		roomID, password, err := c.hub.NewPrivateRoom([]string{c.UserID()})
+		roomID, err := c.hub.NewRoom([]string{c.UserID()})
 		if err != nil {
 			c.send <- valueobjects.RPC_NACK.Export()
 			break
 		}
 		c.hub.users[c.UserID()].SetRoom(roomID)
-		c.send <- []byte("spectrum " + roomID + " " + password)
+		c.send <- []byte("spectrum " + roomID)
 	case subMatch[1] == "joinspectrum":
 		spt := strings.Split(subMatch[9], " ")
 		roomID := spt[0]

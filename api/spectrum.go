@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	spectrum "utile.space/api/domain/entities"
+	"utile.space/api/domain/spectrum"
 )
 
 var (
@@ -46,7 +46,7 @@ func SpectrumWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	hub := getSpectrumHub(context.Background())
 	client := spectrum.NewClient(hub, c)
-	client.Hub.Register <- client
+	hub.Register <- client
 
 	log.Debug("New user connected")
 
