@@ -3,6 +3,7 @@ package spectrum
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"regexp"
 	"slices"
 	"strings"
@@ -11,10 +12,13 @@ import (
 	"utile.space/api/domain/valueobjects"
 )
 
-const spectrum = "spectrum "
+const (
+	spectrum = "spectrum "
+)
 
 var (
-	r = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|leavespectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
+	newPositions = []string{"405,383", "376,413", "322,421", "323,381", "279,389", "360,381"}
+	r            = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|leavespectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -44,6 +48,10 @@ func (c *Client) EvaluateRPC(command string) error {
 			roomID := c.hub.users[c.userID].currentRoomID
 			admin := slices.Contains(c.hub.rooms[roomID].admins, c.userID)
 			c.send <- []byte(spectrum + c.hub.users[c.userID].currentRoomID + " " + fmt.Sprintf("%t", admin))
+
+			for _, participant := range c.hub.rooms[roomID].participants {
+				c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+			}
 		}
 	case subMatch[1] == "nickname":
 		c.send <- valueobjects.RPC_ACK.Export()
@@ -68,6 +76,11 @@ func (c *Client) EvaluateRPC(command string) error {
 		} else {
 			c.hub.users[c.UserID()].SetRoom(roomID)
 			c.send <- []byte(spectrum + roomID + " " + subMatch[9])
+			c.hub.MessageUser(c.UserID(), c.UserID(), "newposition "+newPositions[rand.Intn(len(newPositions))%len(newPositions)])
+
+			for _, participant := range c.hub.rooms[roomID].participants {
+				c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+			}
 		}
 	case subMatch[1] == "leavespectrum":
 		roomID := c.hub.users[c.userID].currentRoomID
@@ -80,11 +93,11 @@ func (c *Client) EvaluateRPC(command string) error {
 		c.send <- valueobjects.RPC_ACK.Export()
 	case subMatch[1] == "update":
 		if c.hub.users[c.UserID()].IsInRoom() {
+			c.hub.users[c.userID].SetLastPosition(subMatch[5])
 			c.hub.MessageRoom(c.hub.users[c.UserID()].Room(), command)
 		}
 	case subMatch[1] == "resetpositions":
 		if c.hub.users[c.UserID()].IsInRoom() {
-			newPositions := []string{"405,383", "376,413", "322,421", "323,381", "279,389", "360,381"}
 			room := c.hub.rooms[c.hub.users[c.UserID()].Room()]
 			var i = 0
 			for _, user := range room.participants {

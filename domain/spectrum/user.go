@@ -5,6 +5,7 @@ type User struct {
 	Nickname      string
 	Color         string
 	currentRoomID string
+	lastPosition  string
 }
 
 func NewUser(userID string) *User {
@@ -19,6 +20,10 @@ func (u *User) SetNickname(nickname string) {
 
 func (u *User) SetRoom(roomID string) {
 	u.currentRoomID = roomID
+}
+
+func (u *User) SetLastPosition(lastPosition string) {
+	u.lastPosition = lastPosition
 }
 
 func (u *User) Room() string {
