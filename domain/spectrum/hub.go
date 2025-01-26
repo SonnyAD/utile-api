@@ -94,16 +94,14 @@ func (h *Hub) LinkUserWithClient(userID string, client *Client) {
 	h.mappingUserIDToClient[userID] = client
 }
 
-func (h *Hub) NewRoom(userIDs []string) (string, error) {
+func (h *Hub) NewRoom(creatorUserID string, creatorColor string) (string, error) {
 	roomID := utils.GenerateRandomString(4)
 
-	room := NewRoom(h.users[userIDs[0]], roomID, "Hello")
+	room := NewRoom(h.users[creatorUserID], roomID, "Hello")
 
-	for _, userID := range userIDs {
-		err := room.AddUser(h.users[userID])
-		if err != nil {
-			return "", errors.New("unknown problem at room creation")
-		}
+	err := room.AddUser(creatorColor, h.users[creatorUserID])
+	if err != nil {
+		return "", errors.New("unknown problem at room creation")
 	}
 
 	h.rooms[roomID] = room
@@ -111,8 +109,8 @@ func (h *Hub) NewRoom(userIDs []string) (string, error) {
 	return roomID, nil
 }
 
-func (h *Hub) NewPrivateRoom(userIDs []string) (string, string, error) {
-	roomID, err := h.NewRoom(userIDs)
+func (h *Hub) NewPrivateRoom(creatorUserID string, creatorColor string) (string, string, error) {
+	roomID, err := h.NewRoom(creatorUserID, creatorColor)
 	if err != nil {
 		return "", "", errors.New("unknown problem at room creation")
 	}
@@ -126,7 +124,7 @@ func (h *Hub) NewPrivateRoom(userIDs []string) (string, string, error) {
 	return roomID, password, nil
 }
 
-func (h *Hub) JoinRoom(roomID string, userID string) error {
+func (h *Hub) JoinRoom(roomID string, userID string, color string) error {
 	room := h.rooms[roomID]
 
 	if room.IsClosed() {
@@ -135,8 +133,8 @@ func (h *Hub) JoinRoom(roomID string, userID string) error {
 
 	user := h.users[userID]
 
-	if err := room.AddUser(user); err != nil {
-		return errors.New("user cannot join room")
+	if err := room.AddUser(color, user); err != nil {
+		return errors.Join(err, errors.New("user cannot join room"))
 	}
 
 	user.SetRoom(roomID)
@@ -151,14 +149,14 @@ func (h *Hub) JoinRoom(roomID string, userID string) error {
 	return nil
 }
 
-func (h *Hub) JoinPrivateRoom(roomID string, userID string, password string) error {
+func (h *Hub) JoinPrivateRoom(roomID string, userID string, password string, color string) error {
 	room := h.rooms[roomID]
 
 	if password != room.password {
 		return errors.New("wrong room or password")
 	}
 
-	return h.JoinRoom(roomID, userID)
+	return h.JoinRoom(roomID, userID, color)
 }
 
 func (h *Hub) Broadcast(senderID string, content string) {

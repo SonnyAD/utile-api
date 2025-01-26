@@ -3,6 +3,7 @@ package spectrum
 import (
 	"errors"
 	"regexp"
+	"slices"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -40,7 +41,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		c.send <- valueobjects.RPC_ACK.Export()
 		c.hub.users[c.UserID()].SetNickname(subMatch[9])
 	case subMatch[1] == "startspectrum":
-		roomID, err := c.hub.NewRoom([]string{c.UserID()})
+		roomID, err := c.hub.NewRoom(c.UserID(), subMatch[3])
 		if err != nil {
 			c.send <- valueobjects.RPC_NACK.Export()
 			break
@@ -51,9 +52,11 @@ func (c *Client) EvaluateRPC(command string) error {
 		spt := strings.Split(subMatch[9], " ")
 		roomID := spt[0]
 		c.hub.users[c.UserID()].SetNickname(spt[1])
-		err := c.hub.JoinRoom(roomID, c.UserID())
+		c.hub.users[c.UserID()].SetColor(spt[2])
+		err := c.hub.JoinRoom(roomID, c.UserID(), spt[2])
 		if err != nil {
 			// Nothing
+			log.Error(err.Error())
 		} else {
 			c.hub.users[c.UserID()].SetRoom(roomID)
 			c.send <- []byte("spectrum " + roomID + " " + subMatch[9])
@@ -66,11 +69,13 @@ func (c *Client) EvaluateRPC(command string) error {
 		if c.hub.users[c.UserID()].IsInRoom() {
 			newPositions := []string{"405,383", "376,413", "322,421", "323,381", "279,389", "360,381"}
 			room := c.hub.rooms[c.hub.users[c.UserID()].Room()]
-			for i, user := range room.participants {
-				if i == 0 || user == nil {
+			var i = 0
+			for _, user := range room.participants {
+				if slices.Contains(room.admins, user.UserID) {
 					continue
 				}
 				c.hub.MessageUser(c.UserID(), user.UserID, "newposition "+newPositions[i%len(newPositions)])
+				i = i + 1
 			}
 		}
 	case subMatch[1] == "claim":

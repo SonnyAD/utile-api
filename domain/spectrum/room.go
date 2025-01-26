@@ -2,7 +2,21 @@ package spectrum
 
 import (
 	"errors"
+	"slices"
 )
+
+var generalColors = []string{
+	"aeaeae", // Neutral gray
+	"ff5555", // Bright red
+	"cd5334", // Burnt oran*-ge
+	"ff9955", // Vibrant orange
+	"ffe680", // Soft yellow
+	"aade87", // Light green
+	"9fd8cb", // Pale teal
+	"aaeeff", // Light cyan
+	"c6afe9", // Soft lavender
+	"985f6f", // Muted mauve
+}
 
 type Room struct {
 	id           string
@@ -10,7 +24,7 @@ type Room struct {
 	password     string
 	closed       bool
 	admins       []string
-	participants []*User
+	participants map[string]*User
 }
 
 func (r *Room) Join(newUser *User) error {
@@ -27,26 +41,22 @@ func NewRoom(creator *User, id string, topic string) *Room {
 		topic:        topic,
 		closed:       false,
 		admins:       []string{creator.UserID},
-		participants: make([]*User, 0, 10),
+		participants: make(map[string]*User),
 	}
-}
-
-func RemoveByPointer(slice []*User, ptr *User) []*User {
-	for i, item := range slice {
-		if item == ptr {
-			// Remove the element by concatenating the slice
-			return append(slice[:i], slice[i+1:]...)
-		}
-	}
-	// Return the original slice if the element wasn't found
-	return slice
 }
 
 func (r *Room) Leave(user *User) error {
 	if r.closed {
 		return errors.New("room closed")
 	}
-	r.participants = RemoveByPointer(r.participants, user)
+
+	for i, item := range r.participants {
+		if item == user {
+			delete(r.participants, i)
+			break
+		}
+	}
+
 	user.SetRoom("")
 	return nil
 }
@@ -63,11 +73,20 @@ func (r *Room) SetPassword(password string) error {
 	return nil
 }
 
-func (r *Room) AddUser(user *User) error {
+func (r *Room) AddUser(color string, user *User) error {
 	if r.closed {
 		return errors.New("room closed")
 	}
-	r.participants = append(r.participants, user)
+
+	if !slices.Contains(generalColors, color) {
+		return errors.New("unknown color")
+	}
+
+	if _, alreadyPresent := r.participants[color]; alreadyPresent {
+		return errors.New("color already taken")
+	}
+
+	r.participants[color] = user
 	return nil
 }
 
