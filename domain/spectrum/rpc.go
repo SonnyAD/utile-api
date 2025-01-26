@@ -2,6 +2,7 @@ package spectrum
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"slices"
 	"strings"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	r = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
+	r = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|leavespectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -37,6 +38,11 @@ func (c *Client) EvaluateRPC(command string) error {
 		c.SetUserID(subMatch[3])
 		c.hub.LinkUserWithClient(c.UserID(), c)
 		c.send <- valueobjects.RPC_ACK.Export()
+		if c.hub.users[c.userID].IsInRoom() {
+			roomID := c.hub.users[c.userID].currentRoomID
+			admin := slices.Contains(c.hub.rooms[roomID].admins, c.userID)
+			c.send <- []byte("spectrum " + c.hub.users[c.userID].currentRoomID + " " + fmt.Sprintf("%t", admin))
+		}
 	case subMatch[1] == "nickname":
 		c.send <- valueobjects.RPC_ACK.Export()
 		c.hub.users[c.UserID()].SetNickname(subMatch[9])
@@ -61,6 +67,15 @@ func (c *Client) EvaluateRPC(command string) error {
 			c.hub.users[c.UserID()].SetRoom(roomID)
 			c.send <- []byte("spectrum " + roomID + " " + subMatch[9])
 		}
+	case subMatch[1] == "leavespectrum":
+		roomID := c.hub.users[c.userID].currentRoomID
+		c.hub.users[c.userID].SetRoom("")
+		err := c.hub.rooms[roomID].Leave(c.hub.users[c.userID])
+		if err != nil {
+			c.send <- valueobjects.RPC_NACK.Export()
+			break
+		}
+		c.send <- valueobjects.RPC_ACK.Export()
 	case subMatch[1] == "update":
 		if c.hub.users[c.UserID()].IsInRoom() {
 			c.hub.MessageRoom(c.hub.users[c.UserID()].Room(), command)
