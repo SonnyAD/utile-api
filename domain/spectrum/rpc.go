@@ -11,6 +11,8 @@ import (
 	"utile.space/api/domain/valueobjects"
 )
 
+const spectrum = "spectrum "
+
 var (
 	r = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|leavespectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
@@ -41,7 +43,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		if c.hub.users[c.userID].IsInRoom() {
 			roomID := c.hub.users[c.userID].currentRoomID
 			admin := slices.Contains(c.hub.rooms[roomID].admins, c.userID)
-			c.send <- []byte("spectrum " + c.hub.users[c.userID].currentRoomID + " " + fmt.Sprintf("%t", admin))
+			c.send <- []byte(spectrum + c.hub.users[c.userID].currentRoomID + " " + fmt.Sprintf("%t", admin))
 		}
 	case subMatch[1] == "nickname":
 		c.send <- valueobjects.RPC_ACK.Export()
@@ -53,7 +55,7 @@ func (c *Client) EvaluateRPC(command string) error {
 			break
 		}
 		c.hub.users[c.UserID()].SetRoom(roomID)
-		c.send <- []byte("spectrum " + roomID)
+		c.send <- []byte(spectrum + roomID)
 	case subMatch[1] == "joinspectrum":
 		spt := strings.Split(subMatch[9], " ")
 		roomID := spt[0]
@@ -65,7 +67,7 @@ func (c *Client) EvaluateRPC(command string) error {
 			log.Error(err.Error())
 		} else {
 			c.hub.users[c.UserID()].SetRoom(roomID)
-			c.send <- []byte("spectrum " + roomID + " " + subMatch[9])
+			c.send <- []byte(spectrum + roomID + " " + subMatch[9])
 		}
 	case subMatch[1] == "leavespectrum":
 		roomID := c.hub.users[c.userID].currentRoomID
