@@ -48,8 +48,6 @@ func SpectrumWebsocket(w http.ResponseWriter, r *http.Request) {
 	client := spectrum.NewClient(hub, c)
 	hub.Register <- client
 
-	log.Debug("New user connected")
-
 	var wg sync.WaitGroup
 
 	wg.Add(2)

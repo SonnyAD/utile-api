@@ -3,6 +3,7 @@ package spectrum
 import (
 	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"regexp"
 	"slices"
@@ -45,6 +46,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		c.hub.LinkUserWithClient(c.UserID(), c)
 		c.send <- valueobjects.RPC_ACK.Export()
 		if c.hub.users[c.userID].IsInRoom() {
+			c.hub.users[c.userID].beginningGracePeriod = math.MaxInt64 - 100
 			roomID := c.hub.users[c.userID].currentRoomID
 			admin := slices.Contains(c.hub.rooms[roomID].admins, c.userID)
 			c.send <- []byte(spectrum + c.hub.users[c.userID].currentRoomID + " " + fmt.Sprintf("%t", admin))
@@ -73,6 +75,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		if err != nil {
 			// Nothing
 			log.Error(err.Error())
+			c.send <- valueobjects.RPC_NACK.Export()
 		} else {
 			c.hub.users[c.UserID()].SetRoom(roomID)
 			c.send <- []byte(spectrum + roomID + " " + subMatch[9])
@@ -91,6 +94,7 @@ func (c *Client) EvaluateRPC(command string) error {
 			break
 		}
 		c.send <- valueobjects.RPC_ACK.Export()
+		c.hub.MessageRoom(roomID, "userleft "+c.hub.users[c.userID].Color)
 	case subMatch[1] == "update":
 		if c.hub.users[c.UserID()].IsInRoom() {
 			c.hub.users[c.userID].SetLastPosition(subMatch[5])

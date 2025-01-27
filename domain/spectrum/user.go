@@ -1,16 +1,20 @@
 package spectrum
 
+import "math"
+
 type User struct {
-	UserID        string
-	Nickname      string
-	Color         string
-	currentRoomID string
-	lastPosition  string
+	UserID               string
+	Nickname             string
+	Color                string
+	currentRoomID        string
+	lastPosition         string
+	beginningGracePeriod int64
 }
 
 func NewUser(userID string) *User {
 	return &User{
-		UserID: userID,
+		UserID:               userID,
+		beginningGracePeriod: math.MaxInt64 - 100,
 	}
 }
 
