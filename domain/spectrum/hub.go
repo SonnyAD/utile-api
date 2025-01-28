@@ -229,6 +229,14 @@ func (h *Hub) Routine(ctx context.Context) {
 				log.WithFields(log.Fields{
 					"roomID": roomID,
 				}).Debug("Checking room")
+				if room.IsClosed() {
+					continue
+				}
+				if len(room.participants) == 0 {
+					room.Close()
+					continue
+				}
+
 				participantsDeleted := make([]string, 0, len(room.participants))
 				participantsToNotify := make([]string, 0, len(room.participants))
 				for i, participant := range room.participants {
