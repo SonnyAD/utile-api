@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	spectrum = "spectrum "
+	spectrum    = "spectrum "
+	newposition = "newposition "
 )
 
 var (
@@ -49,23 +50,29 @@ func (c *Client) EvaluateRPC(command string) error {
 			c.hub.users[c.userID].beginningGracePeriod = math.MaxInt64 - 100
 			roomID := c.hub.users[c.userID].currentRoomID
 			admin := slices.Contains(c.hub.rooms[roomID].admins, c.userID)
-			c.send <- []byte(spectrum + c.hub.users[c.userID].currentRoomID + " " + fmt.Sprintf("%t", admin))
+			c.send <- []byte(spectrum + c.hub.users[c.userID].Color + " " + c.hub.users[c.userID].currentRoomID + " " + c.hub.users[c.userID].Nickname + " " + fmt.Sprintf("%t", admin))
 
 			for _, participant := range c.hub.rooms[roomID].participants {
-				c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+				if !slices.Contains(c.hub.rooms[roomID].admins, participant.UserID) {
+					c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+				}
 			}
+			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+c.hub.users[c.userID].lastPosition)
 		}
 	case subMatch[1] == "nickname":
 		c.send <- valueobjects.RPC_ACK.Export()
 		c.hub.users[c.UserID()].SetNickname(subMatch[9])
 	case subMatch[1] == "startspectrum":
-		roomID, err := c.hub.NewRoom(c.UserID(), subMatch[3])
+		spt := strings.Split(subMatch[9], " ")
+		roomID, err := c.hub.NewRoom(c.UserID(), spt[1])
 		if err != nil {
 			c.send <- valueobjects.RPC_NACK.Export()
 			break
 		}
 		c.hub.users[c.UserID()].SetRoom(roomID)
-		c.send <- []byte(spectrum + roomID)
+		c.hub.users[c.UserID()].SetColor(spt[1])
+		c.hub.users[c.UserID()].SetNickname(spt[0])
+		c.send <- []byte(spectrum + spt[1] + " " + roomID + " " + spt[0] + " true")
 	case subMatch[1] == "joinspectrum":
 		spt := strings.Split(subMatch[9], " ")
 		roomID := spt[0]
@@ -78,11 +85,13 @@ func (c *Client) EvaluateRPC(command string) error {
 			c.send <- valueobjects.RPC_NACK.Export()
 		} else {
 			c.hub.users[c.UserID()].SetRoom(roomID)
-			c.send <- []byte(spectrum + roomID + " " + subMatch[9])
-			c.hub.MessageUser(c.UserID(), c.UserID(), "newposition "+newPositions[rand.Intn(len(newPositions))%len(newPositions)])
+			c.send <- []byte(spectrum + spt[2] + " " + roomID + " " + spt[1] + " false")
+			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+newPositions[rand.Intn(len(newPositions))%len(newPositions)])
 
 			for _, participant := range c.hub.rooms[roomID].participants {
-				c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+				if !slices.Contains(c.hub.rooms[roomID].admins, participant.UserID) {
+					c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+				}
 			}
 		}
 	case subMatch[1] == "leavespectrum":
@@ -108,7 +117,7 @@ func (c *Client) EvaluateRPC(command string) error {
 				if slices.Contains(room.admins, user.UserID) {
 					continue
 				}
-				c.hub.MessageUser(c.UserID(), user.UserID, "newposition "+newPositions[i%len(newPositions)])
+				c.hub.MessageUser(c.UserID(), user.UserID, newposition+newPositions[i%len(newPositions)])
 				i = i + 1
 			}
 		}
