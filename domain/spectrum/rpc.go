@@ -58,6 +58,7 @@ func (c *Client) EvaluateRPC(command string) error {
 				}
 			}
 			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+c.hub.users[c.userID].lastPosition)
+			c.hub.MessageUser(c.UserID(), c.UserID(), "claim "+c.hub.rooms[roomID].Topic())
 		}
 	case subMatch[1] == "nickname":
 		c.send <- valueobjects.RPC_ACK.Export()
@@ -93,6 +94,7 @@ func (c *Client) EvaluateRPC(command string) error {
 					c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
 				}
 			}
+			c.hub.MessageUser(c.UserID(), c.UserID(), "claim "+c.hub.rooms[roomID].Topic())
 		}
 	case subMatch[1] == "leavespectrum":
 		roomID := c.hub.users[c.userID].currentRoomID
@@ -123,7 +125,9 @@ func (c *Client) EvaluateRPC(command string) error {
 		}
 	case subMatch[1] == "claim":
 		if c.hub.users[c.UserID()].IsInRoom() {
-			c.hub.MessageRoom(c.hub.users[c.UserID()].Room(), command)
+			roomID := c.hub.users[c.UserID()].Room()
+			c.hub.rooms[roomID].SetTopic(subMatch[9])
+			c.hub.MessageRoom(roomID, command)
 		}
 	default:
 		return ErrCommandNotRecognized

@@ -98,7 +98,7 @@ func (h *Hub) LinkUserWithClient(userID string, client *Client) {
 func (h *Hub) NewRoom(creatorUserID string, creatorColor string) (string, error) {
 	roomID := utils.GenerateRandomString(4)
 
-	room := NewRoom(h.users[creatorUserID], roomID, "Hello")
+	room := NewRoom(h.users[creatorUserID], roomID, "")
 
 	err := room.AddUser(creatorColor, h.users[creatorUserID])
 	if err != nil {

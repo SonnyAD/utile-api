@@ -65,6 +65,14 @@ func (r *Room) RoomID() string {
 	return r.id
 }
 
+func (r *Room) SetTopic(topic string) {
+	r.topic = topic
+}
+
+func (r *Room) Topic() string {
+	return r.topic
+}
+
 func (r *Room) SetPassword(password string) error {
 	if r.closed {
 		return errors.New("room closed")
