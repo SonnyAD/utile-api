@@ -98,14 +98,15 @@ func (c *Client) EvaluateRPC(command string) error {
 		}
 	case subMatch[1] == "leavespectrum":
 		roomID := c.hub.users[c.userID].currentRoomID
-		c.hub.users[c.userID].SetRoom("")
-		err := c.hub.rooms[roomID].Leave(c.hub.users[c.userID])
+		err := c.hub.rooms[roomID].Leave(c.hub.users[c.userID].Color)
 		if err != nil {
 			c.send <- valueobjects.RPC_NACK.Export()
 			break
 		}
 		c.send <- valueobjects.RPC_ACK.Export()
 		c.hub.MessageRoom(roomID, "userleft "+c.hub.users[c.userID].Color)
+		c.hub.users[c.userID].SetColor("")
+		c.hub.users[c.userID].SetRoom("")
 	case subMatch[1] == "update":
 		if c.hub.users[c.UserID()].IsInRoom() {
 			c.hub.users[c.userID].SetLastPosition(subMatch[5])

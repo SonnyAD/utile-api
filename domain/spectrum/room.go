@@ -8,7 +8,7 @@ import (
 var generalColors = []string{
 	"aeaeae", // Neutral gray
 	"ff5555", // Bright red
-	"cd5334", // Burnt oran*-ge
+	"cd5334", // Burnt orange
 	"ff9955", // Vibrant orange
 	"ffe680", // Soft yellow
 	"aade87", // Light green
@@ -45,19 +45,13 @@ func NewRoom(creator *User, id string, topic string) *Room {
 	}
 }
 
-func (r *Room) Leave(user *User) error {
+func (r *Room) Leave(color string) error {
 	if r.closed {
 		return errors.New("room closed")
 	}
 
-	for i, item := range r.participants {
-		if item == user {
-			delete(r.participants, i)
-			break
-		}
-	}
+	delete(r.participants, color)
 
-	user.SetRoom("")
 	return nil
 }
 
@@ -95,6 +89,18 @@ func (r *Room) AddUser(color string, user *User) error {
 	}
 
 	r.participants[color] = user
+	return nil
+}
+
+func (r *Room) SetAdminByColor(color string) error {
+	if r.closed {
+		return errors.New("room closed")
+	}
+	if _, ok := r.participants[color]; !ok {
+		return errors.New("user not found")
+	}
+
+	r.admins = append(r.admins, r.participants[color].UserID)
 	return nil
 }
 
