@@ -12,10 +12,10 @@ var generalColors = []string{
 	"ff9955", // Vibrant orange
 	"ffe680", // Soft yellow
 	"aade87", // Light green
-	"9fd8cb", // Pale teal
+	"4b0082", // Pale teal
 	"aaeeff", // Light cyan
 	"c6afe9", // Soft lavender
-	"985f6f", // Muted mauve
+	"d473d4", // Muted mauve
 }
 
 type Room struct {
