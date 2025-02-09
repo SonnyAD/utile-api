@@ -19,8 +19,8 @@ const (
 )
 
 var (
-	newPositions = []string{"405,383", "376,413", "322,421", "323,381", "279,389", "360,381"}
-	r            = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|leavespectrum|resetpositions|update|claim)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
+	newPositions = []string{"569,514", "509,521", "426,521", "514,566", "424,569", "382,523"}
+	r            = regexp.MustCompile(`^(emoji|signin|nickname|startspectrum|joinspectrum|leavespectrum|resetpositions|update|claim|makeadmin)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+([\x{1F600}-\x{1F6FF}|[\x{2600}-\x{26FF}]|[\x{1FAE3}]|[\x{1F92F}]|[\x{1FAE1}]|[\x{1F6DF}]))?(\s+(.+))?$`)
 )
 
 var (
@@ -111,6 +111,15 @@ func (c *Client) EvaluateRPC(command string) error {
 		if c.hub.users[c.UserID()].IsInRoom() {
 			c.hub.users[c.userID].SetLastPosition(subMatch[5])
 			c.hub.MessageRoom(c.hub.users[c.UserID()].Room(), command)
+		}
+	case subMatch[1] == "makeadmin":
+		if c.hub.users[c.UserID()].IsInRoom() {
+			roomID := c.hub.users[c.UserID()].Room()
+			err := c.hub.rooms[roomID].SetAdminByColor(subMatch[3])
+			if err != nil {
+				c.send <- valueobjects.RPC_NACK.Export()
+				break
+			}
 		}
 	case subMatch[1] == "resetpositions":
 		if c.hub.users[c.UserID()].IsInRoom() {
