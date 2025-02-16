@@ -30,6 +30,14 @@ func (u *User) SetLastPosition(lastPosition string) {
 	u.lastPosition = lastPosition
 }
 
+func (u *User) LastPosition() string {
+	if u.lastPosition != "" {
+		return u.lastPosition
+	}
+
+	return "N,A" // Not applicable
+}
+
 func (u *User) Room() string {
 	return u.currentRoomID
 }

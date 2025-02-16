@@ -101,6 +101,7 @@ func (r *Room) SetAdminByColor(color string) error {
 	}
 
 	r.admins = append(r.admins, r.participants[color].UserID)
+	r.participants[color].SetLastPosition("")
 	return nil
 }
 

@@ -53,9 +53,11 @@ func (c *Client) EvaluateRPC(command string) error {
 			c.send <- []byte(spectrum + c.hub.users[c.userID].Color + " " + c.hub.users[c.userID].currentRoomID + " " + c.hub.users[c.userID].Nickname + " " + fmt.Sprintf("%t", admin))
 
 			for _, participant := range c.hub.rooms[roomID].participants {
-				if !slices.Contains(c.hub.rooms[roomID].admins, participant.UserID) {
-					c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+				adminUser := ""
+				if slices.Contains(c.hub.rooms[roomID].admins, participant.UserID) {
+					adminUser = "*"
 				}
+				c.send <- []byte("update " + participant.Color + " " + participant.LastPosition() + " " + participant.Nickname + adminUser)
 			}
 			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+c.hub.users[c.userID].lastPosition)
 			c.hub.MessageUser(c.UserID(), c.UserID(), "claim "+c.hub.rooms[roomID].Topic())
@@ -90,9 +92,11 @@ func (c *Client) EvaluateRPC(command string) error {
 			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+newPositions[rand.Intn(len(newPositions))%len(newPositions)])
 
 			for _, participant := range c.hub.rooms[roomID].participants {
-				if !slices.Contains(c.hub.rooms[roomID].admins, participant.UserID) {
-					c.send <- []byte("update " + participant.Color + " " + participant.lastPosition + " " + participant.Nickname)
+				adminUser := ""
+				if slices.Contains(c.hub.rooms[roomID].admins, participant.UserID) {
+					adminUser = "*"
 				}
+				c.send <- []byte("update " + participant.Color + " " + participant.LastPosition() + " " + participant.Nickname + adminUser)
 			}
 			c.hub.MessageUser(c.UserID(), c.UserID(), "claim "+c.hub.rooms[roomID].Topic())
 		}
@@ -120,6 +124,8 @@ func (c *Client) EvaluateRPC(command string) error {
 				c.send <- valueobjects.RPC_NACK.Export()
 				break
 			}
+
+			c.hub.MessageRoom(roomID, "madeadmin "+subMatch[3])
 		}
 	case subMatch[1] == "resetpositions":
 		if c.hub.users[c.UserID()].IsInRoom() {
