@@ -59,7 +59,7 @@ func (c *Client) EvaluateRPC(command string) error {
 				}
 				c.send <- []byte("update " + participant.Color + " " + participant.LastPosition() + " " + participant.Nickname + adminUser)
 			}
-			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+c.hub.users[c.userID].lastPosition)
+			c.hub.MessageUser(c.UserID(), c.UserID(), newposition+c.hub.users[c.userID].LastPosition())
 			c.hub.MessageUser(c.UserID(), c.UserID(), "claim "+c.hub.rooms[roomID].Topic())
 		}
 	case subMatch[1] == "nickname":
