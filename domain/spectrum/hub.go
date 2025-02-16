@@ -126,7 +126,12 @@ func (h *Hub) NewPrivateRoom(creatorUserID string, creatorColor string) (string,
 }
 
 func (h *Hub) JoinRoom(roomID string, userID string, color string) error {
-	room := h.rooms[roomID]
+	var room *Room
+	if r, ok := h.rooms[roomID]; !ok {
+		return errors.New("room not found")
+	} else {
+		room = r
+	}
 
 	if room.IsClosed() {
 		return errors.New("room already closed")
@@ -222,7 +227,7 @@ func (h *Hub) Routine(ctx context.Context) {
 		case <-ctx.Done():
 			log.Info("Hub runner terminated...")
 			return
-		case <-time.After(20 * time.Second):
+		case <-time.After(30 * time.Second):
 			// Cleaning routine
 			log.Debug("Cleaning routine")
 			for roomID, room := range h.rooms {
