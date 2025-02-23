@@ -24,6 +24,9 @@ func (u *User) SetNickname(nickname string) {
 
 func (u *User) SetRoom(roomID string) {
 	u.currentRoomID = roomID
+	if roomID == "" {
+		u.beginningGracePeriod = math.MaxInt64 - 100
+	}
 }
 
 func (u *User) SetLastPosition(lastPosition string) {
