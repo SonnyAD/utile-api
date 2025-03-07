@@ -46,7 +46,7 @@ func NewRoom(creator *User, id string, topic string) *Room {
 }
 
 func (r *Room) Leave(color string) error {
-	if r.closed {
+	if r == nil || r.closed {
 		return errors.New("room closed")
 	}
 
