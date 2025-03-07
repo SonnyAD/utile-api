@@ -69,7 +69,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		spt := strings.Split(subMatch[9], " ")
 		roomID, err := c.hub.NewRoom(c.UserID(), spt[1])
 		if err != nil {
-			c.send <- valueobjects.RPC_NACK.Export()
+			c.send <- valueobjects.RPC_NACK.ExportWith(err.Error())
 			break
 		}
 		c.hub.users[c.UserID()].SetRoom(roomID)
@@ -85,7 +85,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		if err != nil {
 			// Nothing
 			log.Error(err.Error())
-			c.send <- valueobjects.RPC_NACK.Export()
+			c.send <- valueobjects.RPC_NACK.ExportWith(err.Error())
 		} else {
 			c.hub.users[c.UserID()].SetRoom(roomID)
 			c.send <- []byte(spectrum + spt[2] + " " + roomID + " " + spt[1] + " false")
@@ -104,7 +104,7 @@ func (c *Client) EvaluateRPC(command string) error {
 		roomID := c.hub.users[c.userID].currentRoomID
 		err := c.hub.rooms[roomID].Leave(c.hub.users[c.userID].Color)
 		if err != nil {
-			c.send <- valueobjects.RPC_NACK.Export()
+			c.send <- valueobjects.RPC_NACK.ExportWith(err.Error())
 			break
 		}
 		c.send <- valueobjects.RPC_ACK.Export()
@@ -121,7 +121,7 @@ func (c *Client) EvaluateRPC(command string) error {
 			roomID := c.hub.users[c.UserID()].Room()
 			err := c.hub.rooms[roomID].SetAdminByColor(subMatch[3])
 			if err != nil {
-				c.send <- valueobjects.RPC_NACK.Export()
+				c.send <- valueobjects.RPC_NACK.ExportWith(err.Error())
 				break
 			}
 

@@ -10,32 +10,6 @@ import (
 	"utile.space/api/utils"
 )
 
-/*type room interface {
-	setID(id string)
-	setPassword(password string)
-	AddUser(u user) error
-	RemoveUser(u user) error
-	Password() string
-	Close()
-	IsClosed() bool
-	Users() []user
-}
-
-type client interface {
-	UserID() string
-	Send(content []byte)
-}
-
-type user interface {
-	IsInRoom() bool
-	SetRoom(roomId string)
-	Room() string
-	SetNickname(nickname string)
-	Nickname() string
-	UserID() string
-	setUserID(userID string)
-}*/
-
 // Hub maintains the set of active clients with their business entity logic plus the entities associating clients together: Players with Battleships Matches, Participants with Spectrum Rooms, etc.
 type Hub struct {
 	// Registered clients.
@@ -55,6 +29,14 @@ type Hub struct {
 	// Unregister requests from clients.
 	unregister chan *Client
 }
+
+var (
+	ErrRoomNotFound          = errors.New("room not found")
+	ErrRoomClosed            = errors.New("room already closed")
+	ErrWrongRoomOrPassword   = errors.New("wrong room or password")
+	ErrUnknownAtRoomCreation = errors.New("unknown problem at room creation")
+	ErrUserCannotJoin        = errors.New("user cannot join room")
+)
 
 func NewHub() *Hub {
 	return &Hub{
@@ -102,7 +84,7 @@ func (h *Hub) NewRoom(creatorUserID string, creatorColor string) (string, error)
 
 	err := room.AddUser(creatorColor, h.users[creatorUserID])
 	if err != nil {
-		return "", errors.New("unknown problem at room creation")
+		return "", ErrUnknownAtRoomCreation
 	}
 
 	h.rooms[roomID] = room
@@ -113,7 +95,7 @@ func (h *Hub) NewRoom(creatorUserID string, creatorColor string) (string, error)
 func (h *Hub) NewPrivateRoom(creatorUserID string, creatorColor string) (string, string, error) {
 	roomID, err := h.NewRoom(creatorUserID, creatorColor)
 	if err != nil {
-		return "", "", errors.New("unknown problem at room creation")
+		return "", "", ErrUnknownAtRoomCreation
 	}
 	password := utils.GenerateRandomString(12)
 
@@ -128,19 +110,19 @@ func (h *Hub) NewPrivateRoom(creatorUserID string, creatorColor string) (string,
 func (h *Hub) JoinRoom(roomID string, userID string, color string) error {
 	var room *Room
 	if r, ok := h.rooms[roomID]; !ok {
-		return errors.New("room not found")
+		return ErrRoomNotFound
 	} else {
 		room = r
 	}
 
 	if room.IsClosed() {
-		return errors.New("room already closed")
+		return ErrRoomClosed
 	}
 
 	user := h.users[userID]
 
 	if err := room.AddUser(color, user); err != nil {
-		return errors.Join(err, errors.New("user cannot join room"))
+		return errors.Join(err, ErrUserCannotJoin)
 	}
 
 	user.SetRoom(roomID)
@@ -159,7 +141,7 @@ func (h *Hub) JoinPrivateRoom(roomID string, userID string, password string, col
 	room := h.rooms[roomID]
 
 	if password != room.password {
-		return errors.New("wrong room or password")
+		return ErrWrongRoomOrPassword
 	}
 
 	return h.JoinRoom(roomID, userID, color)

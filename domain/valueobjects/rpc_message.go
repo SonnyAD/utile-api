@@ -14,3 +14,10 @@ func NewRPCMessage(message string) RPCMessage {
 func (m RPCMessage) Export() []byte {
 	return ([]byte)(m)
 }
+
+func (m RPCMessage) ExportWith(message string) []byte {
+	res := ([]byte)(m)
+	res = append(res, " "...)
+	res = append(res, message...)
+	return res
+}
